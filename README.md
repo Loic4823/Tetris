@@ -218,7 +218,7 @@ set(SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
 
 FetchContent_Declare(
     freetype
-    URL [https://download.savannah.gnu.org/releases/freetype/freetype-2.13.2.tar.gz](https://download.savannah.gnu.org/releases/freetype/freetype-2.13.2.tar.gz)
+    URL "https://download.savannah.gnu.org/releases/freetype/freetype-2.13.2.tar.gz"
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE # Supprime l'avertissement jaune CMP0135
 )
 FetchContent_MakeAvailable(freetype)
