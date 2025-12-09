@@ -1,80 +1,73 @@
-#include "input.h" // Inclu les defs de touches et actions
-#include <SDL.h>   // Inclu SDL pour les codes clavier
+#include "input.h" // Nos définitions.
+#include <SDL.h>   // SDL.
 
-KeyBinding bindings[ACTION_COUNT]; // Tableau global pour stocker la config des touches
+KeyBinding bindings[ACTION_COUNT]; // Tableau qui stocke la config de toutes les touches.
 
-// Initialise les touches par défaut (AZERTY + Flèches)
+// On définit les touches par défaut (AZERTY + Flèches).
 void InitInputProfile() {
     
-    // --- DEPLACEMENTS (AZERTY FORCE) ---
-    
-    bindings[ACTION_UP].keyPrimary = SDLK_z;       // Z pour Haut (Hard Drop)
-    bindings[ACTION_UP].keySecondary = SDLK_UP;    // Flèche Haut en secondaire
+    // Mouvements
+    bindings[ACTION_UP].keyPrimary = SDLK_z;       // Z pour monter.
+    bindings[ACTION_UP].keySecondary = SDLK_UP;    // Flèche Haut.
 
-    bindings[ACTION_DOWN].keyPrimary = SDLK_s;     // S pour Bas (Soft Drop)
-    bindings[ACTION_DOWN].keySecondary = SDLK_DOWN;// Flèche Bas en secondaire
+    bindings[ACTION_DOWN].keyPrimary = SDLK_s;     // S pour descendre.
+    bindings[ACTION_DOWN].keySecondary = SDLK_DOWN;// Flèche Bas.
 
-    bindings[ACTION_LEFT].keyPrimary = SDLK_q;     // Q pour Gauche (Au lieu de A)
-    bindings[ACTION_LEFT].keySecondary = SDLK_LEFT;// Flèche Gauche en secondaire
+    bindings[ACTION_LEFT].keyPrimary = SDLK_q;     // Q pour gauche (AZERTY).
+    bindings[ACTION_LEFT].keySecondary = SDLK_LEFT;// Flèche Gauche.
 
-    bindings[ACTION_RIGHT].keyPrimary = SDLK_d;    // D pour Droite
-    bindings[ACTION_RIGHT].keySecondary = SDLK_RIGHT;// Flèche Droite en secondaire
+    bindings[ACTION_RIGHT].keyPrimary = SDLK_d;    // D pour droite.
+    bindings[ACTION_RIGHT].keySecondary = SDLK_RIGHT;// Flèche Droite.
 
-    // --- ACTIONS JEU ---
+    // Actions
+    bindings[ACTION_A].keyPrimary = SDLK_a;        // A pour tourner.
+    bindings[ACTION_A].keySecondary = 0;           // Pas de 2ème touche.
 
-    bindings[ACTION_A].keyPrimary = SDLK_a;        // A pour tourner (Au lieu de Q)
-    bindings[ACTION_A].keySecondary = 0;           // Pas de 2eme touche
+    bindings[ACTION_E].keyPrimary = SDLK_e;        // E pour tourner l'autre sens.
+    bindings[ACTION_E].keySecondary = 0;
 
-    bindings[ACTION_E].keyPrimary = SDLK_e;        // E pour tourner dans l'autre sens
-    bindings[ACTION_E].keySecondary = 0;           // Pas de 2eme touche
+    bindings[ACTION_C].keyPrimary = SDLK_c;        // C pour Hold.
+    bindings[ACTION_C].keySecondary = 0;
 
-    bindings[ACTION_C].keyPrimary = SDLK_c;        // C pour stocker la pièce
-    bindings[ACTION_C].keySecondary = 0;           // Pas de 2eme touche
-
-    // --- SYSTEME / SON ---
-
-    bindings[ACTION_MUTE].keyPrimary = SDLK_m;     // M pour couper le son
+    // Système (Son)
+    bindings[ACTION_MUTE].keyPrimary = SDLK_m;     // M pour Muet.
     bindings[ACTION_MUTE].keySecondary = 0;
 
-    bindings[ACTION_VOL_UP].keyPrimary = SDLK_r;       // R pour monter le son
-    bindings[ACTION_VOL_UP].keySecondary = SDLK_KP_PLUS; // "+" du pavé numérique
+    bindings[ACTION_VOL_UP].keyPrimary = SDLK_r;       // R pour monter son.
+    bindings[ACTION_VOL_UP].keySecondary = SDLK_KP_PLUS; // "+" pavé num.
 
-    bindings[ACTION_VOL_DOWN].keyPrimary = SDLK_f;       // F pour baisser le son
-    bindings[ACTION_VOL_DOWN].keySecondary = SDLK_KP_MINUS; // "-" du pavé numérique
+    bindings[ACTION_VOL_DOWN].keyPrimary = SDLK_f;       // F pour baisser son.
+    bindings[ACTION_VOL_DOWN].keySecondary = SDLK_KP_MINUS; // "-" pavé num.
 }
 
-// Vérifie si la touche appuyée correspond à une action
+// Fonction qui check si la touche pressée (keyPressed) correspond à l'action demandée.
 bool IsActionPressed(GameAction action, int keyPressed) {
-    if (keyPressed == bindings[action].keyPrimary) return true; // C'est la touche principale ? -> Vrai
-    if (bindings[action].keySecondary != 0 && keyPressed == bindings[action].keySecondary) return true; // C'est la touche secondaire ? -> Vrai
-    return false; // Sinon -> Faux
+    if (keyPressed == bindings[action].keyPrimary) return true; // C'est la touche 1 ? Oui.
+    if (bindings[action].keySecondary != 0 && keyPressed == bindings[action].keySecondary) return true; // Touche 2 ? Oui.
+    return false; // Non, ça ne correspond pas.
 }
 
-// Change une touche (utilisé par le menu config)
+// Met à jour une touche dans le tableau.
 void UpdateKeyBinding(GameAction action, SDL_Keycode newKey, bool isSecondary) {
     if (isSecondary) {
-        bindings[action].keySecondary = newKey; // Modifie la colonne de droite
+        bindings[action].keySecondary = newKey; // Modifie colonne droite.
     } else {
-        bindings[action].keyPrimary = newKey;   // Modifie la colonne de gauche
+        bindings[action].keyPrimary = newKey;   // Modifie colonne gauche.
     }
 }
 
-// Récupère le code de la touche (pour l'affichage dans le menu)
+// Renvoie le code de la touche (pour l'affichage).
 SDL_Keycode GetKeyBinding(GameAction action, bool secondary) {
-    if (secondary) return bindings[action].keySecondary; // Retourne la touche secondaire
-    return bindings[action].keyPrimary;                 // Retourne la touche principale
+    if (secondary) return bindings[action].keySecondary;
+    return bindings[action].keyPrimary;
 }
 
-// --- SAUVEGARDE ---
-
-// Ecrit la config touches dans le fichier
+// Écrit tout le tableau de touches dans le fichier de sauvegarde.
 void SaveInputProfile(FILE* f) {
-    // Ecrit tout le tableau de touches d'un coup
     fwrite(bindings, sizeof(KeyBinding), ACTION_COUNT, f);
 }
 
-// Lit la config touches depuis le fichier
+// Lit le tableau de touches depuis le fichier de sauvegarde.
 void LoadInputProfile(FILE* f) {
-    // Remplit le tableau avec ce qui est dans le fichier
     fread(bindings, sizeof(KeyBinding), ACTION_COUNT, f);
 }
