@@ -1,3 +1,55 @@
+# 🧱 Projet Tetris C SDL2 - Liste Complète des Fonctionnalités
+
+Ce projet est un clone complet de Tetris écrit en C avec la librairie SDL2. Il intègre des mécaniques modernes, un système de sauvegarde complet et une gestion avancée des paramètres.
+
+## 🎮 Gameplay (Mécaniques de jeu)
+* **Système Classique :** Grille standard de 10 colonnes sur 20 lignes.
+* **7 Pièces (Tetrominoes) :** Gestion des formes I, O, T, S, Z, J, L avec couleurs distinctes.
+* **Générateur "7-Bag" :** Algorithme de distribution aléatoire équitable (mélange de sacs de 7 pièces) pour éviter les répétitions ou les "sécheresses".
+* **Pièce Fantôme (Ghost) :** Affichage en transparence de la position d'atterrissage future pour aider à la visée.
+* **Réserve (Hold) :** Possibilité de stocker une pièce avec la touche `C` pour l'échanger stratégiquement plus tard.
+* **Prévisualisation (Next) :** Affichage de la prochaine pièce à venir.
+* **Chute Rapide (Soft Drop) :** Accélération manuelle de la descente pour gagner du temps.
+* **Chute Instantanée (Hard Drop) :** Pose immédiate de la pièce au sol.
+* **Wall Kicks :** Système de rotation intelligent permettant à la pièce de tourner même contre un mur ou le sol (décalage automatique).
+* **Lock Delay Strict :** Une fois la pièce au sol, un délai de 0.5s est accordé avant le blocage définitif. Le chronomètre ne se réinitialise que si la pièce descend plus bas (méthode anti-infini).
+
+## 📈 Progression & Score
+* **Système de Score :** Points attribués selon le nombre de lignes détruites simultanément (1, 2, 3 ou "Tetris" de 4 lignes).
+* **Niveaux :** Montée en niveau automatique toutes les 10 lignes détruites.
+* **Vitesse Progressive :** La vitesse de chute augmente exponentiellement à chaque niveau.
+* **High Scores :** Sauvegarde et affichage du Meilleur Score et du Meilleur nombre de Lignes.
+
+## ⚙️ Paramètres & Options
+* **Résolution Dynamique :** 3 modes d'affichage supportés :
+    * Fenêtré (800x700)
+    * Grand Fenêtré (1200x1050)
+    * Plein Écran
+* **Packs de Textures :** Changement de l'apparence des blocs en temps réel :
+    * *Default* (Classique)
+    * *Alt* (Alternatif)
+    * *MC* (Style Minecraft)
+* **Configuration des Touches :** Remapping complet du clavier pour toutes les actions (Gauche, Droite, Rotation, Hold...) avec support de deux touches par action.
+* **Niveau de Départ :** Choix du niveau de difficulté initial (1 à 10).
+* **Vitesse Auto :** Option pour activer/désactiver l'accélération automatique progressive.
+* **Réinitialiser :** Bouton pour remettre tous les paramètres aux valeurs d'usine.
+
+## 🎵 Audio
+* **Playlist Musicale :** 10 pistes musicales intégrées (`tetris1.mp3` à `tetris10.mp3`) avec affichage du nom de l'ambiance (Electro, Orchestre, Japonais, etc.).
+* **Mode Silencieux :** Option "Aucune" pour couper la musique tout en gardant les bruitages.
+* **Effets Sonores (SFX) :** Son de validation (`clear.mp3`) joué en synchronisation avec l'animation de destruction de ligne.
+* **Gestion du Volume :**
+    * Contrôle global du volume (Musique + SFX liés).
+    * Mode Muet (Mute) via touche raccourci ou menu.
+    * *Sécurité :* Le jeu démarre toujours en mode "Muet" par défaut.
+
+## 💾 Système & Sauvegarde
+* **Persistance Complète :** Toutes les données sont sauvegardées dans un fichier binaire `save.dat`.
+* **Sauvegarde des Paramètres :** Résolution, touches, choix de musique, textures, records sont conservés entre les sessions.
+* **Reprise de Partie :** Si le jeu est quitté en cours de partie (ou via Échap), l'état exact de la grille est sauvegardé. Un bouton "Continuer" apparaît au prochain lancement.
+* **Interface Graphique :** Menus navigables au clavier avec images de fond et décorations dynamiques (les pièces du menu changent selon le pack de texture choisi).
+
+
 # 🚀 Tuto : Compiler et lancer le projet (Windows & Linux)
 
 Voici la procédure pas à pas pour configurer, compiler et lancer le projet.
