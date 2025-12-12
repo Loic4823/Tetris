@@ -1,111 +1,73 @@
-#include "input.h"
-#include <SDL.h>
-#include <stdbool.h> // Pour bool, true, false
-#include <stdio.h>   // Pour FILE, fopen, fwrite, etc.
+#include "input.h" // Nos définitions.
+#include <SDL.h>   // SDL.
 
-// Tableau global des bindings
-KeyBinding bindings[ACTION_COUNT]; 
+KeyBinding bindings[ACTION_COUNT]; // Tableau qui stocke la config de toutes les touches.
 
+// On définit les touches par défaut (AZERTY + Flèches).
 void InitInputProfile() {
-    // Configuration par défaut
-    bindings[ACTION_LEFT].keyPrimary = SDLK_LEFT;
-    bindings[ACTION_LEFT].keySecondary = SDLK_q;
     
-    bindings[ACTION_RIGHT].keyPrimary = SDLK_RIGHT;
-    bindings[ACTION_RIGHT].keySecondary = SDLK_d;
-    
-    bindings[ACTION_DOWN].keyPrimary = SDLK_DOWN;
-    bindings[ACTION_DOWN].keySecondary = SDLK_s;
-    
-    bindings[ACTION_UP].keyPrimary = SDLK_UP;
-    bindings[ACTION_UP].keySecondary = SDLK_z;
-    
-    bindings[ACTION_A].keyPrimary = SDLK_a;     // Rotation gauche
-    bindings[ACTION_A].keySecondary = 0;        // Pas de secondaire
-    
-    bindings[ACTION_E].keyPrimary = SDLK_e;     // Rotation droite
+    // Mouvements
+    bindings[ACTION_UP].keyPrimary = SDLK_z;       // Z pour monter.
+    bindings[ACTION_UP].keySecondary = SDLK_UP;    // Flèche Haut.
+
+    bindings[ACTION_DOWN].keyPrimary = SDLK_s;     // S pour descendre.
+    bindings[ACTION_DOWN].keySecondary = SDLK_DOWN;// Flèche Bas.
+
+    bindings[ACTION_LEFT].keyPrimary = SDLK_q;     // Q pour gauche (AZERTY).
+    bindings[ACTION_LEFT].keySecondary = SDLK_LEFT;// Flèche Gauche.
+
+    bindings[ACTION_RIGHT].keyPrimary = SDLK_d;    // D pour droite.
+    bindings[ACTION_RIGHT].keySecondary = SDLK_RIGHT;// Flèche Droite.
+
+    // Actions
+    bindings[ACTION_A].keyPrimary = SDLK_a;        // A pour tourner.
+    bindings[ACTION_A].keySecondary = 0;           // Pas de 2ème touche.
+
+    bindings[ACTION_E].keyPrimary = SDLK_e;        // E pour tourner l'autre sens.
     bindings[ACTION_E].keySecondary = 0;
-    
-    bindings[ACTION_C].keyPrimary = SDLK_c;     // Hold
+
+    bindings[ACTION_C].keyPrimary = SDLK_c;        // C pour Hold.
     bindings[ACTION_C].keySecondary = 0;
+
+    // Système (Son)
+    bindings[ACTION_MUTE].keyPrimary = SDLK_m;     // M pour Muet.
+    bindings[ACTION_MUTE].keySecondary = 0;
+
+    bindings[ACTION_VOL_UP].keyPrimary = SDLK_r;       // R pour monter son.
+    bindings[ACTION_VOL_UP].keySecondary = SDLK_KP_PLUS; // "+" pavé num.
+
+    bindings[ACTION_VOL_DOWN].keyPrimary = SDLK_f;       // F pour baisser son.
+    bindings[ACTION_VOL_DOWN].keySecondary = SDLK_KP_MINUS; // "-" pavé num.
 }
 
-// Vérifie si une action correspond à la touche pressée
-// J'ai changé le type de retour en int (1 ou 0) pour simplifier, 
-// ou on peut garder bool si stdbool.h est bien inclus.
-int IsActionPressed(GameAction action, SDL_Keycode keyPressed) {
-    if (action < 0 || action >= ACTION_COUNT) return 0;
-    if (keyPressed == bindings[action].keyPrimary) return 1;
-    if (keyPressed == bindings[action].keySecondary) return 1;
-    return 0;
+// Fonction qui check si la touche pressée (keyPressed) correspond à l'action demandée.
+bool IsActionPressed(GameAction action, int keyPressed) {
+    if (keyPressed == bindings[action].keyPrimary) return true; // C'est la touche 1 ? Oui.
+    if (bindings[action].keySecondary != 0 && keyPressed == bindings[action].keySecondary) return true; // Touche 2 ? Oui.
+    return false; // Non, ça ne correspond pas.
 }
 
-void UpdateKeyBinding(GameAction action, SDL_Keycode newKey, int isSecondary) {
-    if (action < 0 || action >= ACTION_COUNT) return;
-    
+// Met à jour une touche dans le tableau.
+void UpdateKeyBinding(GameAction action, SDL_Keycode newKey, bool isSecondary) {
     if (isSecondary) {
-        bindings[action].keySecondary = newKey;
+        bindings[action].keySecondary = newKey; // Modifie colonne droite.
     } else {
-        bindings[action].keyPrimary = newKey;
+        bindings[action].keyPrimary = newKey;   // Modifie colonne gauche.
     }
 }
 
-SDL_Keycode GetKeyBinding(GameAction action, int isSecondary) {
-    if (action < 0 || action >= ACTION_COUNT) return SDLK_UNKNOWN;
-    
-    if (isSecondary) {
-        return bindings[action].keySecondary;
-    } else {
-        return bindings[action].keyPrimary;
-    }
+// Renvoie le code de la touche (pour l'affichage).
+SDL_Keycode GetKeyBinding(GameAction action, bool secondary) {
+    if (secondary) return bindings[action].keySecondary;
+    return bindings[action].keyPrimary;
 }
 
-void SaveKeyConfig() {
-    FILE* f = fopen("keyconfig.dat", "wb");
-    if (f) {
-        fwrite(bindings, sizeof(KeyBinding), ACTION_COUNT, f);
-        fclose(f);
-    }
+// Écrit tout le tableau de touches dans le fichier de sauvegarde.
+void SaveInputProfile(FILE* f) {
+    fwrite(bindings, sizeof(KeyBinding), ACTION_COUNT, f);
 }
 
-void LoadKeyConfig() {
-    FILE* f = fopen("keyconfig.dat", "rb");
-    if (f) {
-        fread(bindings, sizeof(KeyBinding), ACTION_COUNT, f);
-        fclose(f);
-    } else {
-        InitInputProfile(); // Si pas de fichier, charger defauts
-    }
-}
-
-// Cette fonction n'est plus utilisée comme telle dans la logique actuelle,
-// mais on la laisse vide pour compatibilité si nécessaire, ou on la supprime.
-void HandleKeyConfigInput(GameContext* game, SDL_Keycode key) {
-    if (key == SDLK_ESCAPE) {
-        game->state = STATE_SETTINGS;
-        game->isRebinding = 0;
-        return;
-    }
-
-    if (game->isRebinding) {
-        // Appliquer la nouvelle touche
-        GameAction actionToRebind = (GameAction)game->keyConfigSelection; // Cast sûr car selection correspond aux indices
-        UpdateKeyBinding(actionToRebind, key, game->keyConfigColumn);
-        game->isRebinding = 0;
-    } else {
-        // Navigation dans le menu
-        if (key == SDLK_UP) {
-            game->keyConfigSelection--;
-            if (game->keyConfigSelection < 0) game->keyConfigSelection = ACTION_COUNT - 1;
-        } else if (key == SDLK_DOWN) {
-            game->keyConfigSelection++;
-            if (game->keyConfigSelection >= ACTION_COUNT) game->keyConfigSelection = 0;
-        } else if (key == SDLK_LEFT) {
-            game->keyConfigColumn = 0;
-        } else if (key == SDLK_RIGHT) {
-            game->keyConfigColumn = 1;
-        } else if (key == SDLK_RETURN) {
-            game->isRebinding = 1;
-        }
-    }
+// Lit le tableau de touches depuis le fichier de sauvegarde.
+void LoadInputProfile(FILE* f) {
+    fread(bindings, sizeof(KeyBinding), ACTION_COUNT, f);
 }
