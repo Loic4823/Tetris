@@ -2,106 +2,121 @@
 #define DEFS_H
 
 #include <SDL.h>
-#include <SDL_mixer.h>
 #include <SDL_ttf.h>
-#include <stdbool.h> 
+#include <SDL_mixer.h>
+#include <stdbool.h>
 
 #define LOGICAL_WIDTH 800
 #define LOGICAL_HEIGHT 700
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 20
 #define BLOCK_SIZE 30
-#define BOARD_X_OFFSET 50
+
+#define BOARD_X_OFFSET 140
 #define BOARD_Y_OFFSET 50
 
-#define DAS_DELAY 170
-#define ARR_RATE 50
-#define MAX_LOCK_RESETS 5 
+#define LOCK_DELAY 500
+
+// --- CONSTANTES DE JEU OFFICIELLES ---
+#define DAS_DELAY 170 
+#define ARR_RATE 50   
+#define MAX_LOCK_RESETS 15 // Limite officielle de mouvements au sol
+// -------------------------------------
 
 typedef enum {
     STATE_MENU,
-    STATE_PLAYING,
-    STATE_GAMEOVER,
     STATE_SETTINGS,
     STATE_KEY_CONFIG,
-    STATE_ANIMATING 
+    STATE_PLAYING,
+    STATE_ANIMATING,
+    STATE_GAMEOVER,
+    STATE_QUIT
 } GameState;
 
-typedef enum {
-    ACTION_LEFT,
-    ACTION_RIGHT,
-    ACTION_DOWN,
-    ACTION_UP,
-    ACTION_A, 
-    ACTION_E, 
-    ACTION_C, 
-    ACTION_COUNT 
-} GameAction;
-
 typedef struct {
-    SDL_Keycode keyPrimary;
-    SDL_Keycode keySecondary;
-} KeyBinding;
-
-typedef struct {
-    int x, y;
+    int x;
+    int y;
     int type;
     int rotation;
-} Tetromino;
+} Piece;
+
+typedef struct {
+    SDL_Renderer* renderer;
+    SDL_Window* window;
+    SDL_Texture* blockTextures[7];
+    SDL_Texture* ghostTexture;
+    
+    SDL_Texture* menuBackground;
+    SDL_Texture* settingsBackground;
+
+    TTF_Font* fontLarge;
+    TTF_Font* fontSmall;
+    
+    Mix_Music* musics[11];
+    
+    Mix_Chunk* soundClear;
+} AppContext;
 
 typedef struct {
     int board[BOARD_HEIGHT][BOARD_WIDTH];
-    Tetromino currentPiece;
+    Piece currentPiece;
     int nextPieceType;
-    int heldPieceType;     
-    int canHold;           
+    int heldPieceType;
+    int canHold;
     int score;
     int linesCleared;
     int level;
-    int speed;
-    Uint32 lastDropTime;
-    GameState state;
+    int fallInterval;
     
-    int moveDirection;
-    int moveTimer;
+    int fallTimer;
+    int lockTimer;
+    
+    // --- VARIABLE CRUCIALE POUR LE VRAI SYSTEME ---
     int lockDelayResets; 
+    // ----------------------------------------------
     
-    int isMuted;       
-    int masterVolume;  
+    int lowestY;
     
-    int isPaused;
-    int highScore;
-    int bestLines; 
+    int pieceBag[7];
+    int bagIndex;
 
     int menuSelectedOption;
-    int menuTextureStyle; 
-    int menuAutoSpeed;    
-    int menuStartLevel;   
-    int menuMusicTrack;   
-    int menuResolution;   
-    int gameInProgress;   
+    int menuAutoSpeed;
+    int menuStartLevel;
+    
+    int menuTextureStyle;
+    
+    int menuMusicTrack;
+    int menuResolution;
+    
+    int reloadAssetsPending;
+    int changeMusicPending;
+    int changeResolutionPending;
+    int playSoundClearPending;
 
-    int keyConfigSelection; 
-    int keyConfigColumn;    
-    int isRebinding;        
+    int keyConfigSelection;
+    int keyConfigColumn;
+    int isRebinding;
 
-    int linesToClear[4];    
-    int linesToClearCount;  
-    Uint32 animStartTime;   
-    float animTimer;        
+    int isPaused;
+    int gameInProgress;
+    GameState state;
+
+    int highScore;
+    int bestLines;
+
+    int masterVolume;
+    int isMuted;
+
+    int animTimer;
+    int linesToClear[4];
+    int linesToClearCount;
+
+    // Variables DAS/ARR
+    int dasDirection; 
+    int dasTimer;     
+    int dasPhase;     
+    
 } GameContext;
-
-typedef struct {
-    SDL_Window* window;
-    SDL_Renderer* renderer;
-    SDL_Texture* blockTextures[7];
-    SDL_Texture* ghostTexture;
-    SDL_Texture* menuBackground;
-    SDL_Texture* settingsBackground;
-    TTF_Font* fontLarge;
-    TTF_Font* fontSmall;
-    Mix_Music* musics[11]; 
-    Mix_Chunk* soundClear;
-} AppContext;
 
 #endif

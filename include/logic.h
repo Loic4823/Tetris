@@ -7,7 +7,10 @@ void initGame(GameContext* game);
 void resetGameLogic(GameContext* game);
 void updateGame(GameContext* game, Uint32 deltaTime);
 void handleInput(GameContext* game, SDL_Keycode key);
-void handleKeyUp(GameContext* game, SDL_Keycode key); // Nouvelle fonction
-int getRandomPieceType();
+void handleInputUp(GameContext* game, SDL_Keycode key); // <--- AJOUT POUR LE DAS
+int getRandomPieceType(GameContext* game);
+
+void saveGameData(GameContext* game, int saveFullState);
+void loadGameData(GameContext* game);
 
 #endif
