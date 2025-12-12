@@ -5,52 +5,51 @@
 #include <time.h>
 #include <stdio.h> 
 
-// --- DEFINITION COMPLETE DES FORMES (C'est ce qu'il manquait !) ---
-// Format: [Type][Rotation][Bloc][y, x]
+// --- DEFINITION DES FORMES (SRS STANDARD) ---
 const int TETROMINO_SHAPES[7][4][4][2] = {
-    // I (Barre)
+    // I (Barre) - Cyan
     {
         {{1, 0}, {1, 1}, {1, 2}, {1, 3}}, 
         {{0, 2}, {1, 2}, {2, 2}, {3, 2}}, 
         {{2, 0}, {2, 1}, {2, 2}, {2, 3}}, 
         {{0, 1}, {1, 1}, {2, 1}, {3, 1}}
     },
-    // J
+    // J (Bleu)
     {
         {{0, 0}, {1, 0}, {1, 1}, {1, 2}},
         {{0, 1}, {0, 2}, {1, 1}, {2, 1}},
         {{1, 0}, {1, 1}, {1, 2}, {2, 2}},
         {{0, 1}, {1, 1}, {2, 0}, {2, 1}}
     },
-    // L
+    // L (Orange)
     {
         {{1, 0}, {1, 1}, {1, 2}, {0, 2}},
         {{0, 1}, {1, 1}, {2, 1}, {2, 2}},
         {{1, 0}, {1, 1}, {1, 2}, {2, 0}},
         {{0, 0}, {0, 1}, {1, 1}, {2, 1}}
     },
-    // O (Carré) - Les rotations sont identiques
+    // O (Carré - Jaune)
     {
         {{0, 1}, {0, 2}, {1, 1}, {1, 2}},
         {{0, 1}, {0, 2}, {1, 1}, {1, 2}},
         {{0, 1}, {0, 2}, {1, 1}, {1, 2}},
         {{0, 1}, {0, 2}, {1, 1}, {1, 2}}
     },
-    // S
+    // S (Vert)
     {
         {{1, 0}, {1, 1}, {0, 1}, {0, 2}},
         {{0, 1}, {1, 1}, {1, 2}, {2, 2}},
         {{1, 0}, {1, 1}, {0, 1}, {0, 2}},
         {{0, 1}, {1, 1}, {1, 2}, {2, 2}}
     },
-    // T
+    // T (Violet)
     {
         {{1, 0}, {1, 1}, {0, 1}, {1, 2}},
         {{0, 1}, {1, 1}, {2, 1}, {1, 2}},
         {{1, 0}, {1, 1}, {2, 1}, {1, 2}},
         {{0, 1}, {1, 1}, {2, 1}, {1, 0}}
     },
-    // Z
+    // Z (Rouge)
     {
         {{0, 0}, {0, 1}, {1, 1}, {1, 2}},
         {{0, 2}, {1, 1}, {1, 2}, {2, 1}},
@@ -58,9 +57,35 @@ const int TETROMINO_SHAPES[7][4][4][2] = {
         {{0, 2}, {1, 1}, {1, 2}, {2, 1}}
     }
 };
-// ------------------------------------------------------------------
 
-// Fonction utilitaire locale pour vérifier les collisions
+// --- TABLES DE WALL KICKS SRS (Super Rotation System) ---
+// Format : [Transition Index][Test 0..4][x, y]
+// Transitions : 0->1, 1->0, 1->2, 2->1, 2->3, 3->2, 3->0, 0->3
+
+// Table pour J, L, S, T, Z
+const int KICKS_JLSTZ[8][5][2] = {
+    {{0, 0}, {-1, 0}, {-1, -1}, { 0,  2}, {-1,  2}}, // 0->1
+    {{0, 0}, { 1, 0}, { 1,  1}, { 0, -2}, { 1, -2}}, // 1->0
+    {{0, 0}, { 1, 0}, { 1, -1}, { 0,  2}, { 1,  2}}, // 1->2
+    {{0, 0}, {-1, 0}, {-1,  1}, { 0, -2}, {-1, -2}}, // 2->1
+    {{0, 0}, { 1, 0}, { 1,  1}, { 0, -2}, { 1, -2}}, // 2->3
+    {{0, 0}, {-1, 0}, {-1, -1}, { 0,  2}, {-1,  2}}, // 3->2
+    {{0, 0}, {-1, 0}, {-1, -1}, { 0,  2}, {-1,  2}}, // 3->0
+    {{0, 0}, { 1, 0}, { 1,  1}, { 0, -2}, { 1, -2}}  // 0->3
+};
+
+// Table pour I (Barre)
+const int KICKS_I[8][5][2] = {
+    {{0, 0}, {-2, 0}, { 1, 0}, {-2, -1}, { 1,  2}}, // 0->1
+    {{0, 0}, { 2, 0}, {-1, 0}, { 2,  1}, {-1, -2}}, // 1->0
+    {{0, 0}, {-1, 0}, { 2, 0}, {-1,  2}, { 2, -1}}, // 1->2
+    {{0, 0}, { 1, 0}, {-2, 0}, { 1, -2}, {-2,  1}}, // 2->1
+    {{0, 0}, { 2, 0}, {-1, 0}, { 2,  1}, {-1, -2}}, // 2->3
+    {{0, 0}, {-2, 0}, { 1, 0}, {-2, -1}, { 1,  2}}, // 3->2
+    {{0, 0}, { 1, 0}, {-2, 0}, { 1, -2}, {-2,  1}}, // 3->0
+    {{0, 0}, {-1, 0}, { 2, 0}, {-1,  2}, { 2, -1}}  // 0->3
+};
+
 int checkCollision(GameContext* game, int x, int y, int rotation) {
     for (int i = 0; i < 4; i++) {
         int bx = x + TETROMINO_SHAPES[game->currentPiece.type][rotation][i][1];
@@ -76,24 +101,68 @@ void movePiece(GameContext* game, int dx, int dy) {
     if (!checkCollision(game, game->currentPiece.x + dx, game->currentPiece.y + dy, game->currentPiece.rotation)) {
         game->currentPiece.x += dx;
         game->currentPiece.y += dy;
+        
+        if (dy == 0 && checkCollision(game, game->currentPiece.x, game->currentPiece.y + 1, game->currentPiece.rotation)) {
+            if (game->lockDelayResets < MAX_LOCK_RESETS) {
+                game->lastDropTime = SDL_GetTicks();
+                game->lockDelayResets++;
+            }
+        }
     }
 }
 
 void rotatePiece(GameContext* game, int direction) {
-    int newRotation = (game->currentPiece.rotation + direction);
+    // 1. Calcul de la nouvelle rotation
+    int oldRotation = game->currentPiece.rotation;
+    int newRotation = (oldRotation + direction);
     if (newRotation < 0) newRotation = 3;
     if (newRotation > 3) newRotation = 0;
     
-    if (!checkCollision(game, game->currentPiece.x, game->currentPiece.y, newRotation)) {
-        game->currentPiece.rotation = newRotation;
+    // Le Carré (O - Type 3) ne tourne pas
+    if (game->currentPiece.type == 3) return;
+
+    // 2. Détermination de l'index de transition pour la table SRS
+    // 0->1:0, 1->0:1, 1->2:2, 2->1:3, 2->3:4, 3->2:5, 3->0:6, 0->3:7
+    int kickIndex = 0;
+    if (oldRotation == 0 && newRotation == 1) kickIndex = 0;
+    else if (oldRotation == 1 && newRotation == 0) kickIndex = 1;
+    else if (oldRotation == 1 && newRotation == 2) kickIndex = 2;
+    else if (oldRotation == 2 && newRotation == 1) kickIndex = 3;
+    else if (oldRotation == 2 && newRotation == 3) kickIndex = 4;
+    else if (oldRotation == 3 && newRotation == 2) kickIndex = 5;
+    else if (oldRotation == 3 && newRotation == 0) kickIndex = 6;
+    else if (oldRotation == 0 && newRotation == 3) kickIndex = 7;
+
+    // 3. Sélection de la bonne table (I ou Autres)
+    const int (*kicks)[5][2];
+    if (game->currentPiece.type == 0) { // Type 0 = Barre (I)
+        kicks = &KICKS_I[kickIndex];
     } else {
-        // Wall kick simple
-        if (!checkCollision(game, game->currentPiece.x - 1, game->currentPiece.y, newRotation)) {
-            game->currentPiece.x -= 1;
+        kicks = &KICKS_JLSTZ[kickIndex];
+    }
+
+    // 4. Test des 5 positions (SRS)
+    int rotated = 0;
+    for (int i = 0; i < 5; i++) {
+        int testX = game->currentPiece.x + (*kicks)[i][0];
+        int testY = game->currentPiece.y + (*kicks)[i][1]; // Note: SDL Y est vers le bas, la table est ajustée
+
+        if (!checkCollision(game, testX, testY, newRotation)) {
+            game->currentPiece.x = testX;
+            game->currentPiece.y = testY;
             game->currentPiece.rotation = newRotation;
-        } else if (!checkCollision(game, game->currentPiece.x + 1, game->currentPiece.y, newRotation)) {
-            game->currentPiece.x += 1;
-            game->currentPiece.rotation = newRotation;
+            rotated = 1;
+            break; // On a trouvé une position valide !
+        }
+    }
+
+    // Gestion du Lock Delay après rotation réussie
+    if (rotated) {
+        if (checkCollision(game, game->currentPiece.x, game->currentPiece.y + 1, game->currentPiece.rotation)) {
+            if (game->lockDelayResets < MAX_LOCK_RESETS) {
+                game->lastDropTime = SDL_GetTicks();
+                game->lockDelayResets++;
+            }
         }
     }
 }
@@ -117,6 +186,7 @@ void holdPiece(GameContext* game) {
         game->currentPiece.rotation = 0;
     }
     game->canHold = 0; 
+    game->lockDelayResets = 0; 
 }
 
 void dropPiece(GameContext* game) {
@@ -195,18 +265,17 @@ void lockPiece(GameContext* game) {
     }
     clearLines(game);
     
-    if (game->state != STATE_ANIMATING) {
-        game->currentPiece.type = game->nextPieceType;
-        game->nextPieceType = getRandomPieceType();
-        game->currentPiece.x = BOARD_WIDTH / 2 - 2;
-        game->currentPiece.y = 0;
-        game->currentPiece.rotation = 0;
-        game->canHold = 1;
+    game->currentPiece.type = game->nextPieceType;
+    game->nextPieceType = getRandomPieceType();
+    game->currentPiece.x = BOARD_WIDTH / 2 - 2;
+    game->currentPiece.y = 0;
+    game->currentPiece.rotation = 0;
+    game->canHold = 1;
+    game->lockDelayResets = 0;
 
-        if (checkCollision(game, game->currentPiece.x, game->currentPiece.y, game->currentPiece.rotation)) {
-            game->state = STATE_GAMEOVER;
-            game->gameInProgress = 0;
-        }
+    if (checkCollision(game, game->currentPiece.x, game->currentPiece.y, game->currentPiece.rotation)) {
+        game->state = STATE_GAMEOVER;
+        game->gameInProgress = 0;
     }
 }
 
@@ -257,6 +326,7 @@ void resetGameLogic(GameContext* game) {
     game->currentPiece.rotation = 0;
     game->heldPieceType = -1;
     game->canHold = 1;
+    game->lockDelayResets = 0;
     
     game->lastDropTime = SDL_GetTicks();
     game->isPaused = 0;
@@ -290,12 +360,10 @@ void handleInput(GameContext* game, SDL_Keycode key) {
             } else {
                 if (game->menuSelectedOption == 0) resetGameLogic(game);        
             }
-            // Bouton Paramètres
             if (game->menuSelectedOption == 1 + offset) {
                 game->state = STATE_SETTINGS;
-                game->menuSelectedOption = 0; // On met le curseur en haut des paramètres
+                game->menuSelectedOption = 0;
             }
-            // Bouton Quitter
             if (game->menuSelectedOption == 2 + offset) exit(0);
         }
     } else if (game->state == STATE_SETTINGS) {
@@ -325,18 +393,14 @@ void handleInput(GameContext* game, SDL_Keycode key) {
             if (game->menuSelectedOption == 6) { game->menuResolution += dir; if(game->menuResolution < 0) game->menuResolution = 2; if(game->menuResolution > 2) game->menuResolution = 0; }
         } else if (key == SDLK_RETURN) {
             if (game->menuSelectedOption == 5) game->state = STATE_KEY_CONFIG;
-            
-            // --- CORRECTION 1 : REINITIALISER ---
             if (game->menuSelectedOption == 7) { 
                 game->menuTextureStyle = 0; game->menuAutoSpeed = 1; game->menuStartLevel = 1; 
                 game->menuMusicTrack = 0; game->menuResolution = 0; 
-                game->masterVolume = 0; // Force le volume à 0 lors du reset
+                game->masterVolume = 0;
             }
-            
-            // --- CORRECTION 2 : RETOUR AU MENU ---
             if (game->menuSelectedOption == 8) {
                 game->state = STATE_MENU;
-                game->menuSelectedOption = 0; // On remet le curseur sur la première option (sinon il reste invisible en bas)
+                game->menuSelectedOption = 0;
             }
         }
     } else if (game->state == STATE_GAMEOVER) {
@@ -363,8 +427,8 @@ void handleInput(GameContext* game, SDL_Keycode key) {
                 movePiece(game, 0, 1); game->score++; 
             }
             else if (IsActionPressed(ACTION_UP, key)) dropPiece(game);
-            else if (IsActionPressed(ACTION_A, key)) rotatePiece(game, 1);
-            else if (IsActionPressed(ACTION_E, key)) rotatePiece(game, -1);
+            else if (IsActionPressed(ACTION_A, key)) rotatePiece(game, -1);
+            else if (IsActionPressed(ACTION_E, key)) rotatePiece(game, 1);
             else if (IsActionPressed(ACTION_C, key)) holdPiece(game);
         }
     }
@@ -388,12 +452,6 @@ void updateGame(GameContext* game, Uint32 deltaTime) {
         game->animTimer += deltaTime;
         if (game->animTimer > 500) { 
             finishLineClear(game);
-            if (checkCollision(game, game->currentPiece.x, game->currentPiece.y, game->currentPiece.rotation)) {
-                game->state = STATE_GAMEOVER;
-                game->gameInProgress = 0;
-            } else {
-                game->state = STATE_PLAYING;
-            }
         }
         return;
     }

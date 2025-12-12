@@ -1,5 +1,5 @@
 #include "draw.h"
-#include "audio.h" // On garde l'include, mais on n'utilise pas audioSystem ici
+#include "audio.h"
 #include "input.h"
 #include <SDL_image.h>
 #include <stdio.h>
@@ -21,7 +21,7 @@ void loadBlockTextures(AppContext* app, int style) {
     if (style == 0) styleFolder = "default";
     else if (style == 1) styleFolder = "alt";
     else styleFolder = "mc";
-    const char* colors[] = {"cyan", "jaune", "violet", "vert", "rouge", "bleu", "orange"};
+    const char* colors[] = {"cyan", "bleu", "orange", "jaune", "vert", "violet", "rouge"};
     for (int i = 0; i < 7; i++) {
         if (app->blockTextures[i]) SDL_DestroyTexture(app->blockTextures[i]);
         sprintf(path, "assets/images/%s/%s.png", styleFolder, colors[i]);
@@ -59,7 +59,6 @@ int initSDL(AppContext* app) {
     for (int i = 0; i < 10; i++) {
         sprintf(zikPath, "assets/music/tetris%d.mp3", i + 1); 
         app->musics[i] = Mix_LoadMUS(zikPath);
-        if (!app->musics[i]) printf("Attention: Impossible de charger %s\n", zikPath);
     }
     app->musics[10] = NULL;
     
@@ -280,7 +279,6 @@ void renderSettingsMenu(AppContext* app, GameContext* game) {
     sprintf(buffer, "Niveau Depart: < %d >", game->menuStartLevel);
     renderText(app, buffer, midX, startY + spacing * 2, (game->menuSelectedOption == 2) ? highlight : white, app->fontLarge, 1);
 
-    // CORRECTION ICI : Utilisation de game->isMuted et game->masterVolume
     if (game->isMuted || game->masterVolume <= 0) sprintf(buffer, "Volume: < MUET >");
     else sprintf(buffer, "Volume: < %d%% >", (int)((game->masterVolume / 128.0f) * 100));
     
