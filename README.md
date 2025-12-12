@@ -5,13 +5,14 @@ Ce projet est un clone complet de Tetris écrit en C avec la librairie SDL2. Il 
 ## 🎮 Gameplay (Mécaniques de jeu)
 * **Système Classique :** Grille standard de 10 colonnes sur 20 lignes.
 * **7 Pièces (Tetrominoes) :** Gestion des formes I, O, T, S, Z, J, L avec couleurs distinctes.
+* **Système de Rotation SRS Complet :** Implémentation du Super Rotation System officiel incluant les tables de "Wall Kicks". Cela permet aux pièces de tourner intelligemment dans les espaces restreints sans se bloquer.
+* **Gestion des Entrées (DAS & ARR) :** Contrôles fluides et réactifs grâce au Delayed Auto-Shift (délai initial) et à l'Auto-Repeat Rate (vitesse de répétition), permettant des déplacements latéraux rapides et précis.
 * **Générateur "7-Bag" :** Algorithme de distribution aléatoire équitable (mélange de sacs de 7 pièces) pour éviter les répétitions ou les "sécheresses".
 * **Pièce Fantôme (Ghost) :** Affichage en transparence de la position d'atterrissage future pour aider à la visée.
 * **Réserve (Hold) :** Possibilité de stocker une pièce avec la touche `C` pour l'échanger stratégiquement plus tard.
 * **Prévisualisation (Next) :** Affichage de la prochaine pièce à venir.
 * **Chute Rapide (Soft Drop) :** Accélération manuelle de la descente pour gagner du temps.
 * **Chute Instantanée (Hard Drop) :** Pose immédiate de la pièce au sol.
-* **Wall Kicks :** Système de rotation intelligent permettant à la pièce de tourner même contre un mur ou le sol (décalage automatique).
 * **Lock Delay Strict :** Une fois la pièce au sol, un délai de 0.5s est accordé avant le blocage définitif. Le chronomètre ne se réinitialise que si la pièce descend plus bas (méthode anti-infini).
 
 ## 📈 Progression & Score
