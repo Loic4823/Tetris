@@ -4,7 +4,7 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 #include <SDL_ttf.h>
-#include <stdbool.h> // Nécessaire pour bool
+#include <stdbool.h> 
 
 #define LOGICAL_WIDTH 800
 #define LOGICAL_HEIGHT 700
@@ -16,6 +16,7 @@
 
 #define DAS_DELAY 170
 #define ARR_RATE 50
+#define MAX_LOCK_RESETS 5 
 
 typedef enum {
     STATE_MENU,
@@ -26,20 +27,17 @@ typedef enum {
     STATE_ANIMATING 
 } GameState;
 
-// Enumération des actions
 typedef enum {
     ACTION_LEFT,
     ACTION_RIGHT,
     ACTION_DOWN,
     ACTION_UP,
-    ACTION_A, // Rotation gauche
-    ACTION_E, // Rotation droite
-    ACTION_C, // Hold
-    // Ajout d'une constante pour la taille du tableau
+    ACTION_A, 
+    ACTION_E, 
+    ACTION_C, 
     ACTION_COUNT 
 } GameAction;
 
-// Structure pour stocker les touches configurées
 typedef struct {
     SDL_Keycode keyPrimary;
     SDL_Keycode keySecondary;
@@ -66,6 +64,7 @@ typedef struct {
     
     int moveDirection;
     int moveTimer;
+    int lockDelayResets; 
     
     int isMuted;       
     int masterVolume;  
