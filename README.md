@@ -307,6 +307,7 @@ Ensuite, lancez les commandes correspondantes à votre système :
 ### 🪟 Windows (MinGW64)
 
 Mettez le dossier "mingw64" a la rascine de votre disque C:
+
 [télécharger](https://www.mingw-w64.org/source/) mingw64
 
 ```bash
