@@ -306,6 +306,9 @@ Ensuite, lancez les commandes correspondantes à votre système :
 
 ### 🪟 Windows (MinGW64)
 
+Mettez le dossier "mingw64" a la rascine de votre disque C:
+[télécharger](https://www.mingw-w64.org/source/) mingw64
+
 ```bash
 cmake -G "MinGW Makefiles" -DCMAKE_C_COMPILER="C:/mingw64/bin/gcc.exe" -DCMAKE_CXX_COMPILER="C:/mingw64/bin/g++.exe" -DCMAKE_MAKE_PROGRAM="C:/mingw64/bin/mingw32-make.exe" ..
 cmake --build .
