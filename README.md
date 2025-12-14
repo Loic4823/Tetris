@@ -36,7 +36,7 @@ Ce projet est un clone complet de Tetris écrit en C avec la librairie SDL2. Il 
 * **Réinitialiser :** Bouton pour remettre tous les paramètres aux valeurs d'usine.
 
 ## 🎵 Audio
-* **Playlist Musicale :** 10 pistes musicales intégrées (`tetris1.mp3` à `tetris10.mp3`) avec affichage du nom de l'ambiance (Electro, Orchestre, Japonais, etc.).
+* **Playlist Musicale :** 10 pistes musicales intégrées (`tetris1.mp3` à `tetris11.mp3`) avec affichage du nom de l'ambiance (Electro, Orchestre, Japonais, Minecraft, etc.).
 * **Mode Silencieux :** Option "Aucune" pour couper la musique tout en gardant les bruitages.
 * **Effets Sonores (SFX) :** Son de validation (`clear.mp3`) joué en synchronisation avec l'animation de destruction de ligne.
 * **Gestion du Volume :**
