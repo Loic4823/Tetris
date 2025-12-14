@@ -52,7 +52,7 @@ typedef struct {
     TTF_Font* fontLarge;
     TTF_Font* fontSmall;
     
-    Mix_Music* musics[11];
+    Mix_Music* musics[12];
     
     Mix_Chunk* soundClear;
 } AppContext;
