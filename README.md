@@ -294,6 +294,70 @@ endif()
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
 ```
 
+### Pour mac
+
+```cmake
+cmake_minimum_required(VERSION 3.16)
+project(ProjetSDL2 C)
+
+set(CMAKE_C_STANDARD 11)
+
+# ==============================================================================
+# DÉTECTION DES LIBRAIRIES (VIA HOMEBREW)
+# ==============================================================================
+# Sur Mac, on utilise les paquets système, c'est beaucoup plus stable.
+
+find_package(SDL2 REQUIRED)
+find_package(SDL2_image REQUIRED)
+find_package(SDL2_ttf REQUIRED)
+find_package(SDL2_mixer REQUIRED)
+
+# ==============================================================================
+# SOURCES
+# ==============================================================================
+
+file(GLOB SOURCES "src/*.c")
+
+# ==============================================================================
+# CRÉATION DU "APP BUNDLE" (.app)
+# ==============================================================================
+# MACOSX_BUNDLE dit à CMake de créer une vraie application Mac et pas juste un binaire.
+
+add_executable(ProjetSDL2 MACOSX_BUNDLE ${SOURCES})
+
+# On lie les librairies trouvées
+target_link_libraries(ProjetSDL2 PRIVATE 
+    SDL2::SDL2 
+    SDL2_image::SDL2_image 
+    SDL2_ttf::SDL2_ttf 
+    SDL2_mixer::SDL2_mixer
+)
+
+# On inclut les headers (defs.h, etc.)
+target_include_directories(ProjetSDL2 PRIVATE include)
+
+# ==============================================================================
+# GESTION DES ASSETS (COPIE DANS LE .APP)
+# ==============================================================================
+# C'est la partie "Mac Proof". On copie le dossier 'assets' DANS l'application.
+# Chemin final : ProjetSDL2.app/Contents/Resources/assets
+
+set(APPS_DIR "${CMAKE_CURRENT_BINARY_DIR}/ProjetSDL2.app/Contents/Resources")
+
+add_custom_command(TARGET ProjetSDL2 POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${APPS_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets ${APPS_DIR}/assets
+    COMMENT "Copie du dossier assets dans le paquet de l'application..."
+)
+
+# Infos pour le système (Nom, Version...)
+set_target_properties(ProjetSDL2 PROPERTIES
+    MACOSX_BUNDLE_BUNDLE_NAME "TetrisSDL"
+    MACOSX_BUNDLE_GUI_IDENTIFIER "com.monnom.tetris"
+    MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0"
+)
+```
+
 ### 3. Compilation et Lancement
 
 Ouvrez votre terminal et placez-vous dans le dossier build que vous venez de créer :
@@ -313,6 +377,14 @@ Mettez le dossier "mingw64" a la rascine de votre disque C:
 ```bash
 cmake -G "MinGW Makefiles" -DCMAKE_C_COMPILER="C:/mingw64/bin/gcc.exe" -DCMAKE_CXX_COMPILER="C:/mingw64/bin/g++.exe" -DCMAKE_MAKE_PROGRAM="C:/mingw64/bin/mingw32-make.exe" ..
 cmake --build .
+```
+
+### Mac
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+cmake ..
+make
 ```
 
 ### 🐧 Linux
