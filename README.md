@@ -374,6 +374,8 @@ Mettez le dossier "mingw64" a la rascine de votre disque C:
 
 [télécharger](https://www.mingw-w64.org/source/) mingw64
 
+Compiler :
+
 ```bash
 cmake -G "MinGW Makefiles" -DCMAKE_C_COMPILER="C:/mingw64/bin/gcc.exe" -DCMAKE_CXX_COMPILER="C:/mingw64/bin/g++.exe" -DCMAKE_MAKE_PROGRAM="C:/mingw64/bin/mingw32-make.exe" ..
 cmake --build .
@@ -387,12 +389,16 @@ A faire une fois pour installer "Homebrew" :
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
+Compiler :
+
 ```bash
 cmake ..
 make
 ```
 
 ### 🐧 Linux
+
+Compiler :
 
 ```bash
 cmake ..
