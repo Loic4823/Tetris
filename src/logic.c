@@ -485,7 +485,7 @@ void handleInput(GameContext* game, SDL_Keycode key) {
                 if (game->menuSelectedOption == 1) game->menuAutoSpeed = !game->menuAutoSpeed;
                 if (game->menuSelectedOption == 2) game->menuStartLevel = (game->menuStartLevel - 1 < 1) ? 10 : game->menuStartLevel - 1;
                 if (game->menuSelectedOption == 3) { audioSystem.volume -= 0.1f; if (audioSystem.volume < 0.0f) audioSystem.volume = 0.0f; ApplyVolume(); }
-                if (game->menuSelectedOption == 4) { game->menuMusicTrack = (game->menuMusicTrack - 1 + 11) % 11; game->changeMusicPending = 1; }
+                if (game->menuSelectedOption == 4) { game->menuMusicTrack = (game->menuMusicTrack - 1 + 12) % 12; game->changeMusicPending = 1; }
                 if (game->menuSelectedOption == 6) { game->menuResolution = (game->menuResolution - 1 + 3) % 3; game->changeResolutionPending = 1; }
                 break;
             case SDLK_RIGHT: case SDLK_d:
@@ -493,7 +493,7 @@ void handleInput(GameContext* game, SDL_Keycode key) {
                 if (game->menuSelectedOption == 1) game->menuAutoSpeed = !game->menuAutoSpeed;
                 if (game->menuSelectedOption == 2) game->menuStartLevel = (game->menuStartLevel + 1 > 10) ? 1 : game->menuStartLevel + 1;
                 if (game->menuSelectedOption == 3) { audioSystem.volume += 0.1f; if (audioSystem.volume > 1.0f) audioSystem.volume = 1.0f; audioSystem.isMuted = false; ApplyVolume(); }
-                if (game->menuSelectedOption == 4) { game->menuMusicTrack = (game->menuMusicTrack + 1) % 11; game->changeMusicPending = 1; }
+                if (game->menuSelectedOption == 4) { game->menuMusicTrack = (game->menuMusicTrack + 1) % 12; game->changeMusicPending = 1; }
                 if (game->menuSelectedOption == 6) { game->menuResolution = (game->menuResolution + 1) % 3; game->changeResolutionPending = 1; }
                 break;
             case SDLK_RETURN:

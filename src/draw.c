@@ -40,7 +40,6 @@ int initSDL(AppContext* app) {
     if (TTF_Init() == -1) return 0;
     if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) return 0;
     
-    // --- CORRECTION DIAGNOSTIC AUDIO ---
     int flags = MIX_INIT_MP3;
     if ((Mix_Init(flags) & flags) != flags) {
         printf("Attention Mix_Init: %s\n", Mix_GetError());
@@ -50,7 +49,6 @@ int initSDL(AppContext* app) {
         printf("Erreur Mix_OpenAudio: %s\n", Mix_GetError());
         return 0;
     }
-    // -----------------------------------
 
     app->window = SDL_CreateWindow("Tetris C SDL2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, LOGICAL_WIDTH, LOGICAL_HEIGHT, SDL_WINDOW_SHOWN);
     if (!app->window) return 0;
@@ -68,9 +66,9 @@ int initSDL(AppContext* app) {
     app->fontLarge = TTF_OpenFont("assets/fonts/SourceCodePro-Bold.ttf", 28);
     app->fontSmall = TTF_OpenFont("assets/fonts/SourceCodePro-Bold.ttf", 14);
 
-    // --- CHARGEMENT MUSIQUE AVEC DIAGNOSTIC ---
+    // Chargement des 11 musiques
     char zikPath[64];
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 11; i++) {
         sprintf(zikPath, "assets/music/tetris%d.mp3", i + 1);
         app->musics[i] = Mix_LoadMUS(zikPath);
         if (!app->musics[i]) {
@@ -82,16 +80,17 @@ int initSDL(AppContext* app) {
     if (!app->soundClear) {
         printf("ERREUR: Impossible de charger clear.mp3 -> %s\n", Mix_GetError());
     }
-    // ------------------------------------------
 
     return 1;
 }
 
 void playMusicTrack(AppContext* app, int track) {
     Mix_HaltMusic();
-    if (track >= 0 && track < 10 && app->musics[track]) {
+    // --- CORRECTION ICI : track < 11 (et non 10) pour inclure la 11ème musique ---
+    if (track >= 0 && track < 11 && app->musics[track]) {
         Mix_PlayMusic(app->musics[track], -1);
     }
+    // -----------------------------------------------------------------------------
 }
 
 void playClearSound(AppContext* app) {
@@ -122,7 +121,7 @@ void cleanupSDL(AppContext* app) {
     if (app->fontLarge) TTF_CloseFont(app->fontLarge);
     if (app->fontSmall) TTF_CloseFont(app->fontSmall);
 
-    for (int i = 0; i < 10; i++) if (app->musics[i]) Mix_FreeMusic(app->musics[i]);
+    for (int i = 0; i < 11; i++) if (app->musics[i]) Mix_FreeMusic(app->musics[i]);
     if (app->soundClear) Mix_FreeChunk(app->soundClear);
 
     SDL_DestroyRenderer(app->renderer);
@@ -346,9 +345,17 @@ void renderSettingsMenu(AppContext* app, GameContext* game) {
     else sprintf(buffer, "Volume: < %d%% >", (int)(audioSystem.volume * 100));
     renderText(app, buffer, midX, startY + spacing * 3, (game->menuSelectedOption == 3) ? highlight : white, app->fontLarge, 1);
 
-    const char* musicNames[] = { "Electro", "Orchestre", "Dramatique", "Techno", "Orgue Vent", "Metal", "Bass Techno", "Flute", "Piano", "Japonais", "Aucune" };
+    const char* musicNames[] = { 
+        "Electro", "Orchestre", "Dramatique", "Techno", 
+        "Orgue Vent", "Metal", "Bass Techno", "Flute", 
+        "Piano", "Japonais", "Minecraft", "Aucune" 
+    };
+
     int trackIndex = game->menuMusicTrack;
-    if (trackIndex < 0 || trackIndex > 10) trackIndex = 10;
+    
+    // --- CORRECTION ICI : Autoriser jusqu'à l'index 11 (Aucune) ---
+    if (trackIndex < 0 || trackIndex > 11) trackIndex = 11;
+    // --------------------------------------------------------------
 
     sprintf(buffer, "Musique: < %s >", musicNames[trackIndex]);
     renderText(app, buffer, midX, startY + spacing * 4, (game->menuSelectedOption == 4) ? highlight : white, app->fontLarge, 1);
