@@ -360,7 +360,7 @@ set_target_properties(ProjetSDL2 PROPERTIES
 
 ### 3. Compilation et Lancement
 
-## L'extension "CMake" est obligatoire pour compiler se projet 
+### L'extension "CMake" est obligatoire pour compiler se projet 
 
 Ouvrez votre terminal et placez-vous dans le dossier build que vous venez de créer :
 
