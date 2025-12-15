@@ -86,11 +86,9 @@ int initSDL(AppContext* app) {
 
 void playMusicTrack(AppContext* app, int track) {
     Mix_HaltMusic();
-    // --- CORRECTION ICI : track < 11 (et non 10) pour inclure la 11ème musique ---
     if (track >= 0 && track < 11 && app->musics[track]) {
         Mix_PlayMusic(app->musics[track], -1);
     }
-    // -----------------------------------------------------------------------------
 }
 
 void playClearSound(AppContext* app) {
@@ -240,6 +238,20 @@ void renderGame(AppContext* app, GameContext* game) {
     sprintf(buffer, "Niveau: %d", game->level);
     renderText(app, buffer, uiX, 530, white, app->fontLarge, 0);
 
+    // --- AFFICHAGE DES MESSAGES (TETRIS / T-SPIN) ---
+    if (game->messageTimer > 0) {
+        game->messageTimer--;
+        
+        // Couleur changeante (Or / Blanc)
+        SDL_Color msgColor = {255, 255, 255, 255};
+        if (game->messageTimer % 10 < 5) { // Clignotement
+             msgColor.r = 255; msgColor.g = 215; msgColor.b = 0; // Or
+        }
+
+        renderText(app, game->messageText, BOARD_X_OFFSET + (BOARD_WIDTH * BLOCK_SIZE) / 2, 250, msgColor, app->fontLarge, 1);
+    }
+    // ------------------------------------------------
+
     renderText(app, "Voir Menu pour config touches | Espace: Pause", LOGICAL_WIDTH / 2, LOGICAL_HEIGHT - 30, white, app->fontSmall, 1);
 
     if (game->state == STATE_GAMEOVER) {
@@ -352,10 +364,7 @@ void renderSettingsMenu(AppContext* app, GameContext* game) {
     };
 
     int trackIndex = game->menuMusicTrack;
-    
-    // --- CORRECTION ICI : Autoriser jusqu'à l'index 11 (Aucune) ---
     if (trackIndex < 0 || trackIndex > 11) trackIndex = 11;
-    // --------------------------------------------------------------
 
     sprintf(buffer, "Musique: < %s >", musicNames[trackIndex]);
     renderText(app, buffer, midX, startY + spacing * 4, (game->menuSelectedOption == 4) ? highlight : white, app->fontLarge, 1);

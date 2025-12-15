@@ -6,15 +6,81 @@
 #include <time.h>
 #include <stdio.h>
 
-// --- DEFINITION DES PIECES ---
+// --- DEFINITION DES PIECES (SRS OFFICIEL) ---
 const int TETROMINO_SHAPES[7][4][4][2] = {
-    {{{0,1}, {1,1}, {2,1}, {3,1}}, {{1,0}, {1,1}, {1,2}, {1,3}}, {{0,1}, {1,1}, {2,1}, {3,1}}, {{1,0}, {1,1}, {1,2}, {1,3}}}, // I
-    {{{1,0}, {2,0}, {1,1}, {2,1}}, {{1,0}, {2,0}, {1,1}, {2,1}}, {{1,0}, {2,0}, {1,1}, {2,1}}, {{1,0}, {2,0}, {1,1}, {2,1}}}, // O
-    {{{0,1}, {1,1}, {2,1}, {1,0}}, {{1,0}, {1,1}, {1,2}, {2,1}}, {{0,1}, {1,1}, {2,1}, {1,2}}, {{1,0}, {1,1}, {1,2}, {0,1}}}, // T
-    {{{0,0}, {1,0}, {1,1}, {2,1}}, {{1,0}, {1,1}, {0,1}, {0,2}}, {{0,0}, {1,0}, {1,1}, {2,1}}, {{1,0}, {1,1}, {0,1}, {0,2}}}, // S
-    {{{0,1}, {1,1}, {1,0}, {2,0}}, {{0,0}, {0,1}, {1,1}, {1,2}}, {{0,1}, {1,1}, {1,0}, {2,0}}, {{0,0}, {0,1}, {1,1}, {1,2}}}, // Z
-    {{{0,0}, {0,1}, {1,1}, {2,1}}, {{1,0}, {2,0}, {1,1}, {1,2}}, {{0,1}, {1,1}, {2,1}, {2,2}}, {{1,0}, {1,1}, {1,2}, {0,2}}}, // J
-    {{{2,0}, {0,1}, {1,1}, {2,1}}, {{1,0}, {1,1}, {1,2}, {2,2}}, {{0,1}, {1,1}, {2,1}, {0,2}}, {{0,0}, {1,0}, {1,1}, {1,2}}}  // L
+    // I (Type 0) - Cyan
+    // Orbite : Ligne 1 -> Col 2 -> Ligne 2 -> Col 1
+    {
+        {{1,0}, {1,1}, {1,2}, {1,3}}, // 0 : Horizontal (Haut)
+        {{0,2}, {1,2}, {2,2}, {3,2}}, // 1 : Vertical (Droite)
+        {{2,0}, {2,1}, {2,2}, {2,3}}, // 2 : Horizontal (Bas)
+        {{0,1}, {1,1}, {2,1}, {3,1}}  // 3 : Vertical (Gauche)
+    },
+    // O (Type 1) - Jaune
+    {
+        {{0,1}, {0,2}, {1,1}, {1,2}}, 
+        {{0,1}, {0,2}, {1,1}, {1,2}},
+        {{0,1}, {0,2}, {1,1}, {1,2}},
+        {{0,1}, {0,2}, {1,1}, {1,2}}
+    },
+    // T (Type 2) - Violet
+    {
+        {{0,1}, {1,0}, {1,1}, {1,2}}, // 0 : Pointe Haut
+        {{0,1}, {1,1}, {2,1}, {1,2}}, // 1 : Pointe Droite
+        {{1,0}, {1,1}, {1,2}, {2,1}}, // 2 : Pointe Bas
+        {{0,1}, {1,1}, {2,1}, {1,0}}  // 3 : Pointe Gauche
+    },
+    // S (Type 3) - Vert
+    {
+        {{0,1}, {0,2}, {1,0}, {1,1}}, // 0
+        {{0,1}, {1,1}, {1,2}, {2,2}}, // 1
+        {{1,1}, {1,2}, {2,0}, {2,1}}, // 2
+        {{0,0}, {1,0}, {1,1}, {2,1}}  // 3
+    },
+    // Z (Type 4) - Rouge
+    {
+        {{0,0}, {0,1}, {1,1}, {1,2}}, // 0
+        {{0,2}, {1,1}, {1,2}, {2,1}}, // 1
+        {{1,0}, {1,1}, {2,1}, {2,2}}, // 2
+        {{0,1}, {1,0}, {1,1}, {2,0}}  // 3
+    },
+    // J (Type 5) - Bleu
+    {
+        {{0,0}, {1,0}, {1,1}, {1,2}}, // 0 : J couché haut
+        {{0,1}, {0,2}, {1,1}, {2,1}}, // 1
+        {{1,0}, {1,1}, {1,2}, {2,2}}, // 2
+        {{0,1}, {1,1}, {2,1}, {2,0}}  // 3
+    },
+    // L (Type 6) - Orange
+    {
+        {{0,2}, {1,0}, {1,1}, {1,2}}, // 0
+        {{0,1}, {1,1}, {2,1}, {2,2}}, // 1
+        {{1,0}, {1,1}, {1,2}, {2,0}}, // 2
+        {{0,0}, {0,1}, {1,1}, {2,1}}  // 3
+    }
+};
+
+// --- TABLES DE WALL KICKS SRS ---
+const int WALL_KICKS_JLSTZ[8][5][2] = {
+    {{0, 0}, {-1, 0}, {-1, 1}, {0, -2}, {-1, -2}}, // 0 -> 1 (R)
+    {{0, 0}, {1, 0}, {1, -1}, {0, 2}, {1, 2}},     // 1 -> 0 (L)
+    {{0, 0}, {1, 0}, {1, -1}, {0, 2}, {1, 2}},     // 1 -> 2 (R)
+    {{0, 0}, {-1, 0}, {-1, 1}, {0, -2}, {-1, -2}}, // 2 -> 1 (L)
+    {{0, 0}, {1, 0}, {1, 1}, {0, -2}, {1, -2}},    // 2 -> 3 (R)
+    {{0, 0}, {-1, 0}, {-1, -1}, {0, 2}, {-1, 2}},  // 3 -> 2 (L)
+    {{0, 0}, {-1, 0}, {-1, -1}, {0, 2}, {-1, 2}},  // 3 -> 0 (R)
+    {{0, 0}, {1, 0}, {1, 1}, {0, -2}, {1, -2}}     // 0 -> 3 (L)
+};
+
+const int WALL_KICKS_I[8][5][2] = {
+    {{0, 0}, {-2, 0}, {1, 0}, {-2, -1}, {1, 2}},   // 0 -> 1 (R)
+    {{0, 0}, {2, 0}, {-1, 0}, {2, 1}, {-1, -2}},   // 1 -> 0 (L)
+    {{0, 0}, {-1, 0}, {2, 0}, {-1, 2}, {2, -1}},   // 1 -> 2 (R)
+    {{0, 0}, {1, 0}, {-2, 0}, {1, -2}, {-2, 1}},   // 2 -> 1 (L)
+    {{0, 0}, {2, 0}, {-1, 0}, {2, 1}, {-1, -2}},   // 2 -> 3 (R)
+    {{0, 0}, {-2, 0}, {1, 0}, {-2, -1}, {1, 2}},   // 3 -> 2 (L)
+    {{0, 0}, {1, 0}, {-2, 0}, {1, -2}, {-2, 1}},   // 3 -> 0 (R)
+    {{0, 0}, {-1, 0}, {2, 0}, {-1, 2}, {2, -1}}    // 0 -> 3 (L)
 };
 
 // --- 7-BAG ---
@@ -117,6 +183,12 @@ void initGame(GameContext* game) {
     game->fallTimer = 0;
     game->lockTimer = 0;
     game->lockDelayResets = 0;
+    
+    // Initialisation T-Spin
+    game->lastActionWasRotate = 0;
+    game->tSpinBonus = 0;
+    game->messageTimer = 0;
+    sprintf(game->messageText, "");
 
     game->nextPieceType = getRandomPieceType(game);
     game->heldPieceType = -1;
@@ -165,6 +237,37 @@ static int checkCollision(GameContext* game, int px, int py, int type, int rot) 
     return 0;
 }
 
+// --- DETECTION T-SPIN ---
+static int isOccupied(GameContext* game, int x, int y) {
+    // Les murs extérieurs comptent comme occupés
+    if (x < 0 || x >= BOARD_WIDTH || y >= BOARD_HEIGHT) return 1;
+    // Au dessus du plateau (ciel) c'est vide
+    if (y < 0) return 0; 
+    // Sinon on regarde la grille
+    return (game->board[y][x] != -1);
+}
+
+static int checkTSpin(GameContext* game) {
+    if (game->currentPiece.type != 2) return 0; // 2 = Pièce T
+    if (!game->lastActionWasRotate) return 0;   // Faut avoir tourné juste avant
+
+    int x = game->currentPiece.x;
+    int y = game->currentPiece.y;
+    int corners = 0;
+
+    // Le centre du T est en (x+1, y+1) localement dans la boite 4x4
+    // Les coins de la boite 3x3 autour du centre sont (0,0), (2,0), (0,2), (2,2)
+    // Coordonnées relatives :
+    if (isOccupied(game, x, y)) corners++;         // Haut-Gauche
+    if (isOccupied(game, x + 2, y)) corners++;     // Haut-Droite
+    if (isOccupied(game, x, y + 2)) corners++;     // Bas-Gauche
+    if (isOccupied(game, x + 2, y + 2)) corners++; // Bas-Droite
+
+    // Règle officielle : 3 coins occupés = T-Spin
+    return (corners >= 3);
+}
+// ------------------------
+
 static void spawnPiece(GameContext* game) {
     game->currentPiece.type = game->nextPieceType;
     game->currentPiece.rotation = 0;
@@ -177,6 +280,10 @@ static void spawnPiece(GameContext* game) {
     game->lowestY = game->currentPiece.y;
     game->lockDelayResets = 0;
     game->dasDirection = 0;
+    
+    // Reset T-Spin status
+    game->lastActionWasRotate = 0;
+    game->tSpinBonus = 0;
 
     if (checkCollision(game, game->currentPiece.x, game->currentPiece.y, game->currentPiece.type, 0)) {
         game->state = STATE_GAMEOVER;
@@ -200,6 +307,8 @@ void resetGameLogic(GameContext* game) {
     game->canHold = 1;
     game->gameInProgress = 1;
     game->bagIndex = 7;
+    
+    game->messageTimer = 0;
 
     double multiplier = pow(0.75, game->level - 1);
     game->fallInterval = (int)(multiplier * 1000);
@@ -230,8 +339,37 @@ static void performLineClear(GameContext* game) {
     }
     if (linesFound > 0) {
         game->linesCleared += linesFound;
-        int points[] = {0, 40, 100, 300, 1200};
-        game->score += points[linesFound] * game->level;
+        
+        // --- NOUVEAU SYSTEME DE SCORE ---
+        int baseScore = 0;
+        
+        if (game->tSpinBonus) {
+            // T-Spin !
+            switch(linesFound) {
+                case 1: baseScore = 800; sprintf(game->messageText, "T-SPIN SINGLE"); break;
+                case 2: baseScore = 1200; sprintf(game->messageText, "T-SPIN DOUBLE"); break;
+                case 3: baseScore = 1600; sprintf(game->messageText, "T-SPIN TRIPLE"); break;
+                default: baseScore = 400; sprintf(game->messageText, "T-SPIN"); break;
+            }
+        } else {
+            // Normal
+            switch(linesFound) {
+                case 1: baseScore = 100; break;
+                case 2: baseScore = 300; break;
+                case 3: baseScore = 500; break;
+                case 4: baseScore = 800; sprintf(game->messageText, "TETRIS !"); break;
+            }
+        }
+        
+        if (baseScore > 0) {
+            game->score += baseScore * game->level;
+            // Si on a un message à afficher, on met le timer
+            if (game->tSpinBonus || linesFound == 4) {
+                game->messageTimer = 120; // ~2 secondes
+            }
+        }
+        // --------------------------------
+        
         int newLevel = game->menuStartLevel + game->linesCleared / 10;
         if (newLevel > 10) newLevel = 10;
         if (newLevel > game->level) {
@@ -242,7 +380,15 @@ static void performLineClear(GameContext* game) {
                 if (game->fallInterval < 50) game->fallInterval = 50;
             }
         }
+    } else {
+        // Cas rare : T-Spin sans ligne (Mini T-Spin Zero)
+        if (game->tSpinBonus) {
+             game->score += 400 * game->level;
+             sprintf(game->messageText, "T-SPIN");
+             game->messageTimer = 80;
+        }
     }
+    
     game->linesToClearCount = 0;
     game->animTimer = 0;
     game->state = STATE_PLAYING;
@@ -266,11 +412,19 @@ static void detectLines(GameContext* game) {
         game->animTimer = 0;
         game->playSoundClearPending = 1;
     } else {
-        spawnPiece(game);
+        // Pas de ligne, mais peut-être un T-Spin sans ligne
+        performLineClear(game); 
     }
 }
 
 static void lockPiece(GameContext* game) {
+    // 1. Détecter le T-Spin AVANT de verrouiller la pièce
+    if (checkTSpin(game)) {
+        game->tSpinBonus = 1;
+    } else {
+        game->tSpinBonus = 0;
+    }
+
     for (int i = 0; i < 4; i++) {
         int bx = game->currentPiece.x + TETROMINO_SHAPES[game->currentPiece.type][game->currentPiece.rotation][i][1];
         int by = game->currentPiece.y + TETROMINO_SHAPES[game->currentPiece.type][game->currentPiece.rotation][i][0];
@@ -300,12 +454,14 @@ static void movePiece(GameContext* game, int dx, int dy) {
         game->currentPiece.x += dx;
         game->currentPiece.y += dy;
         
+        game->lastActionWasRotate = 0; // Le mouvement annule le T-Spin
+        
         if (dy > 0) {
             game->fallTimer = 0;
             if (game->currentPiece.y > game->lowestY) {
                 game->lowestY = game->currentPiece.y;
                 game->lockTimer = 0;
-                game->lockDelayResets = 0; // Reset si on descend pour de bon
+                game->lockDelayResets = 0;
             }
         } else {
             // Si on bouge et qu'on est toujours au sol
@@ -316,56 +472,59 @@ static void movePiece(GameContext* game, int dx, int dy) {
     }
 }
 
-// =============================================================
-// ROTATION STRICTE SIMPLIFIÉE (HORIZONTAL SEULEMENT)
-// =============================================================
 static void rotatePiece(GameContext* game, int dir) {
     if (game->state != STATE_PLAYING || game->isPaused) return;
-    if (game->currentPiece.type == 1) return; // O ne tourne pas
+    
+    // Le carré (O) ne tourne jamais
+    if (game->currentPiece.type == 1) return; 
 
-    int newRot = (game->currentPiece.rotation + dir + 4) % 4;
+    int oldRot = game->currentPiece.rotation;
+    int newRot = (oldRot + dir + 4) % 4;
+    int pieceType = game->currentPiece.type;
 
-    // Table de Kicks STRICTE (Pas de mouvement Y, pas de descente)
-    // 1. Sur place
-    // 2. Décalage Droite
-    // 3. Décalage Gauche
-    // 4. Décalage Droite x2 (Uniquement pour la Barre I)
-    // 5. Décalage Gauche x2 (Uniquement pour la Barre I)
-    int kicks[5][2] = {
-        {0, 0}, 
-        {1, 0}, {-1, 0}, 
-        {2, 0}, {-2, 0}
-    };
+    int kickIndex = 0;
+    if      (oldRot == 0 && newRot == 1) kickIndex = 0;
+    else if (oldRot == 1 && newRot == 0) kickIndex = 1;
+    else if (oldRot == 1 && newRot == 2) kickIndex = 2;
+    else if (oldRot == 2 && newRot == 1) kickIndex = 3;
+    else if (oldRot == 2 && newRot == 3) kickIndex = 4;
+    else if (oldRot == 3 && newRot == 2) kickIndex = 5;
+    else if (oldRot == 3 && newRot == 0) kickIndex = 6;
+    else if (oldRot == 0 && newRot == 3) kickIndex = 7;
 
-    // La barre (Type 0) teste 5 positions, les autres 3 seulement
-    int maxTests = (game->currentPiece.type == 0) ? 5 : 3;
+    const int (*currentKicks)[2] = (pieceType == 0) ? WALL_KICKS_I[kickIndex] : WALL_KICKS_JLSTZ[kickIndex];
 
-    for (int i = 0; i < maxTests; i++) {
-        int testX = game->currentPiece.x + kicks[i][0];
-        int testY = game->currentPiece.y + kicks[i][1]; // Toujours 0 en Y !
+    for (int i = 0; i < 5; i++) {
+        int kickX = currentKicks[i][0];
+        int kickY = currentKicks[i][1];
 
-        if (!checkCollision(game, testX, testY, game->currentPiece.type, newRot)) {
-            // Rotation Validée
+        // Inversion Y SDL
+        int testX = game->currentPiece.x + kickX;
+        int testY = game->currentPiece.y - kickY;
+
+        if (!checkCollision(game, testX, testY, pieceType, newRot)) {
+            // Rotation Validée !
             game->currentPiece.x = testX;
             game->currentPiece.y = testY;
             game->currentPiece.rotation = newRot;
+            
+            game->lastActionWasRotate = 1; // On vient de tourner !
 
-            // Gestion Reset Timer
-            if (checkCollision(game, game->currentPiece.x, game->currentPiece.y + 1, game->currentPiece.type, game->currentPiece.rotation)) {
+            // Gestion Lock Delay
+            if (checkCollision(game, game->currentPiece.x, game->currentPiece.y + 1, pieceType, newRot)) {
                 resetLockTimerIfAllowed(game);
             }
-            return;
+            return; 
         }
     }
-    // Si échec, rien ne se passe (pas de rotation)
 }
-// =============================================================
 
 static void dropPiece(GameContext* game) {
     if (game->state != STATE_PLAYING || game->isPaused) return;
     while (!checkCollision(game, game->currentPiece.x, game->currentPiece.y + 1, game->currentPiece.type, game->currentPiece.rotation)) {
         game->currentPiece.y++;
         game->score += 2;
+        game->lastActionWasRotate = 0; // Drop annule T-Spin
     }
     lockPiece(game);
 }
@@ -388,6 +547,9 @@ static void holdPiece(GameContext* game) {
         game->lowestY = -100;
         game->dasDirection = 0; 
         game->lockDelayResets = 0;
+        
+        game->lastActionWasRotate = 0;
+        game->tSpinBonus = 0;
     }
     game->canHold = 0;
 }
@@ -541,8 +703,14 @@ void handleInput(GameContext* game, SDL_Keycode key) {
             }
             else if (IsActionPressed(ACTION_DOWN, key)) { movePiece(game, 0, 1); game->score++; }
             else if (IsActionPressed(ACTION_UP, key)) dropPiece(game);
-            else if (IsActionPressed(ACTION_A, key)) rotatePiece(game, 1);
-            else if (IsActionPressed(ACTION_E, key)) rotatePiece(game, -1);
+            
+            // --- CORRECTION SENS DE ROTATION ---
+            // A (Gauche) = -1 (Anti-Horaire)
+            else if (IsActionPressed(ACTION_A, key)) rotatePiece(game, -1);
+            // E (Droite) = 1 (Horaire)
+            else if (IsActionPressed(ACTION_E, key)) rotatePiece(game, 1);
+            // -----------------------------------
+            
             else if (IsActionPressed(ACTION_C, key)) holdPiece(game);
         }
     } else if (game->state == STATE_GAMEOVER) {
