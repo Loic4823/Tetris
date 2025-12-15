@@ -408,3 +408,13 @@ make
 ```
 
 Une fois terminé, vous trouverez l'exécutable généré (ProjetSDL2 ou ProjetSDL2.exe) directement dans le dossier build.
+
+
+
+
+
+
+
+
+
+#### Record des devs : 447206 points et 329 lignes
