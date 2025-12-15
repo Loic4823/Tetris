@@ -70,10 +70,7 @@ typedef struct {
     
     int fallTimer;
     int lockTimer;
-    
-    // --- VARIABLE CRUCIALE POUR LE VRAI SYSTEME ---
     int lockDelayResets; 
-    // ----------------------------------------------
     
     int lowestY;
     
@@ -116,6 +113,14 @@ typedef struct {
     int dasDirection; 
     int dasTimer;     
     int dasPhase;     
+
+    // --- T-SPIN & MESSAGES (NOUVEAU) ---
+    int lastActionWasRotate; // 1 si la dernière action était une rotation
+    int tSpinBonus;          // 0 = Non, 1 = T-Spin détecté
+    
+    char messageText[32];    // Pour afficher "TETRIS", "T-SPIN", etc.
+    int messageTimer;        // Temps d'affichage du message
+    // -----------------------------------
     
 } GameContext;
 
