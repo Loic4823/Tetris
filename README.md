@@ -376,6 +376,8 @@ Mettez le dossier "mingw64" a la rascine de votre disque C:
 
 [télécharger](https://www.mingw-w64.org/source/) mingw64
 
+Mettez egalement "C:/mingw64" dans le path. 
+
 Compiler :
 
 ```bash
