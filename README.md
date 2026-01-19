@@ -82,7 +82,6 @@ set(SDL_SHARED OFF CACHE BOOL "Build shared SDL" FORCE)
 set(SDL_STATIC ON CACHE BOOL "Build static SDL" FORCE)
 set(SDL_TEST OFF CACHE BOOL "Disable SDL test" FORCE)
 
-# On désactive PipeWire car l'API a changé et fait planter la compilation de cette version de SDL
 set(SDL_PIPEWIRE OFF CACHE BOOL "Disable PipeWire audio" FORCE)
 set(SDL_PIPEWIRE_SHARED OFF CACHE BOOL "Disable PipeWire shared" FORCE)
 
@@ -302,7 +301,6 @@ set(CMAKE_C_STANDARD 11)
 # ==============================================================================
 # DÉTECTION DES LIBRAIRIES (VIA HOMEBREW)
 # ==============================================================================
-# Sur Mac, on utilise les paquets système, c'est beaucoup plus stable.
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
@@ -333,8 +331,6 @@ target_include_directories(ProjetSDL2 PRIVATE include)
 # ==============================================================================
 # GESTION DES ASSETS (COPIE DANS LE .APP)
 # ==============================================================================
-# C'est la partie "Mac Proof". On copie le dossier 'assets' DANS l'application.
-# Chemin final : ProjetSDL2.app/Contents/Resources/assets
 
 set(APPS_DIR "${CMAKE_CURRENT_BINARY_DIR}/ProjetSDL2.app/Contents/Resources")
 
@@ -404,13 +400,5 @@ make
 ```
 
 Une fois terminé, vous trouverez l'exécutable généré (ProjetSDL2 ou ProjetSDL2.exe) directement dans le dossier build.
-
-
-
-
-
-
-
-
 
 #### Record des devs : 447206 points et 329 lignes
