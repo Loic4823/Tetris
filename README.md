@@ -82,12 +82,10 @@ set(SDL_SHARED OFF CACHE BOOL "Build shared SDL" FORCE)
 set(SDL_STATIC ON CACHE BOOL "Build static SDL" FORCE)
 set(SDL_TEST OFF CACHE BOOL "Disable SDL test" FORCE)
 
-# --- CORRECTION DU PLANTAGE ARCH LINUX ---
 # On désactive PipeWire car l'API a changé et fait planter la compilation de cette version de SDL
 set(SDL_PIPEWIRE OFF CACHE BOOL "Disable PipeWire audio" FORCE)
 set(SDL_PIPEWIRE_SHARED OFF CACHE BOOL "Disable PipeWire shared" FORCE)
 
-# --- CONFIGURATION SDL_MIXER ---
 set(SDL2MIXER_OPUS OFF CACHE BOOL "Disable Opus" FORCE)
 set(SDL2MIXER_FLAC OFF CACHE BOOL "Disable FLAC" FORCE)
 set(SDL2MIXER_MOD OFF CACHE BOOL "Disable MOD" FORCE)
@@ -95,7 +93,6 @@ set(SDL2MIXER_MIDI OFF CACHE BOOL "Disable MIDI" FORCE)
 set(SDL2MIXER_WAVPACK OFF CACHE BOOL "Disable WavPack" FORCE)
 set(SDL2MIXER_GME OFF CACHE BOOL "Disable GME" FORCE)
 
-# MP3 via MiniMP3 (interne)
 set(SDL2MIXER_MP3_MINIMP3 ON CACHE BOOL "Use internal MiniMP3" FORCE)
 set(SDL2MIXER_VORBIS STB CACHE STRING "Use internal STB Vorbis" FORCE)
 
@@ -321,11 +318,9 @@ file(GLOB SOURCES "src/*.c")
 # ==============================================================================
 # CRÉATION DU "APP BUNDLE" (.app)
 # ==============================================================================
-# MACOSX_BUNDLE dit à CMake de créer une vraie application Mac et pas juste un binaire.
 
 add_executable(ProjetSDL2 MACOSX_BUNDLE ${SOURCES})
 
-# On lie les librairies trouvées
 target_link_libraries(ProjetSDL2 PRIVATE 
     SDL2::SDL2 
     SDL2_image::SDL2_image 
@@ -333,7 +328,6 @@ target_link_libraries(ProjetSDL2 PRIVATE
     SDL2_mixer::SDL2_mixer
 )
 
-# On inclut les headers (defs.h, etc.)
 target_include_directories(ProjetSDL2 PRIVATE include)
 
 # ==============================================================================
