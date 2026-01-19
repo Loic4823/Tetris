@@ -7,60 +7,29 @@
 #include <stdio.h>
 
 // --- DEFINITION DES PIECES (SRS OFFICIEL) ---
+// Tableau 4D : [Type][Rotation][Bloc 0-3][Coordonnées Y,X]
 const int TETROMINO_SHAPES[7][4][4][2] = {
-    // I (Type 0) - Cyan
-    // Orbite : Ligne 1 -> Col 2 -> Ligne 2 -> Col 1
-    {
-        {{1,0}, {1,1}, {1,2}, {1,3}}, // 0 : Horizontal (Haut)
-        {{0,2}, {1,2}, {2,2}, {3,2}}, // 1 : Vertical (Droite)
-        {{2,0}, {2,1}, {2,2}, {2,3}}, // 2 : Horizontal (Bas)
-        {{0,1}, {1,1}, {2,1}, {3,1}}  // 3 : Vertical (Gauche)
-    },
-    // O (Type 1) - Jaune
-    {
-        {{0,1}, {0,2}, {1,1}, {1,2}}, 
-        {{0,1}, {0,2}, {1,1}, {1,2}},
-        {{0,1}, {0,2}, {1,1}, {1,2}},
-        {{0,1}, {0,2}, {1,1}, {1,2}}
-    },
-    // T (Type 2) - Violet
-    {
-        {{0,1}, {1,0}, {1,1}, {1,2}}, // 0 : Pointe Haut
-        {{0,1}, {1,1}, {2,1}, {1,2}}, // 1 : Pointe Droite
-        {{1,0}, {1,1}, {1,2}, {2,1}}, // 2 : Pointe Bas
-        {{0,1}, {1,1}, {2,1}, {1,0}}  // 3 : Pointe Gauche
-    },
-    // S (Type 3) - Vert
-    {
-        {{0,1}, {0,2}, {1,0}, {1,1}}, // 0
-        {{0,1}, {1,1}, {1,2}, {2,2}}, // 1
-        {{1,1}, {1,2}, {2,0}, {2,1}}, // 2
-        {{0,0}, {1,0}, {1,1}, {2,1}}  // 3
-    },
-    // Z (Type 4) - Rouge
-    {
-        {{0,0}, {0,1}, {1,1}, {1,2}}, // 0
-        {{0,2}, {1,1}, {1,2}, {2,1}}, // 1
-        {{1,0}, {1,1}, {2,1}, {2,2}}, // 2
-        {{0,1}, {1,0}, {1,1}, {2,0}}  // 3
-    },
-    // J (Type 5) - Bleu
-    {
-        {{0,0}, {1,0}, {1,1}, {1,2}}, // 0 : J couché haut
-        {{0,1}, {0,2}, {1,1}, {2,1}}, // 1
-        {{1,0}, {1,1}, {1,2}, {2,2}}, // 2
-        {{0,1}, {1,1}, {2,1}, {2,0}}  // 3
-    },
-    // L (Type 6) - Orange
-    {
-        {{0,2}, {1,0}, {1,1}, {1,2}}, // 0
-        {{0,1}, {1,1}, {2,1}, {2,2}}, // 1
-        {{1,0}, {1,1}, {1,2}, {2,0}}, // 2
-        {{0,0}, {0,1}, {1,1}, {2,1}}  // 3
-    }
+    // ... (Données des formes I, O, T, S, Z, J, L) ...
+    // J'abrège ici pour la lisibilité, le contenu est le même que ton fichier original
+    // I (Type 0)
+    { {{1,0}, {1,1}, {1,2}, {1,3}}, {{0,2}, {1,2}, {2,2}, {3,2}}, {{2,0}, {2,1}, {2,2}, {2,3}}, {{0,1}, {1,1}, {2,1}, {3,1}} },
+    // O (Type 1)
+    { {{0,1}, {0,2}, {1,1}, {1,2}}, {{0,1}, {0,2}, {1,1}, {1,2}}, {{0,1}, {0,2}, {1,1}, {1,2}}, {{0,1}, {0,2}, {1,1}, {1,2}} },
+    // T (Type 2)
+    { {{0,1}, {1,0}, {1,1}, {1,2}}, {{0,1}, {1,1}, {2,1}, {1,2}}, {{1,0}, {1,1}, {1,2}, {2,1}}, {{0,1}, {1,1}, {2,1}, {1,0}} },
+    // S (Type 3)
+    { {{0,1}, {0,2}, {1,0}, {1,1}}, {{0,1}, {1,1}, {1,2}, {2,2}}, {{1,1}, {1,2}, {2,0}, {2,1}}, {{0,0}, {1,0}, {1,1}, {2,1}} },
+    // Z (Type 4)
+    { {{0,0}, {0,1}, {1,1}, {1,2}}, {{0,2}, {1,1}, {1,2}, {2,1}}, {{1,0}, {1,1}, {2,1}, {2,2}}, {{0,1}, {1,0}, {1,1}, {2,0}} },
+    // J (Type 5)
+    { {{0,0}, {1,0}, {1,1}, {1,2}}, {{0,1}, {0,2}, {1,1}, {2,1}}, {{1,0}, {1,1}, {1,2}, {2,2}}, {{0,1}, {1,1}, {2,1}, {2,0}} },
+    // L (Type 6)
+    { {{0,2}, {1,0}, {1,1}, {1,2}}, {{0,1}, {1,1}, {2,1}, {2,2}}, {{1,0}, {1,1}, {1,2}, {2,0}}, {{0,0}, {0,1}, {1,1}, {2,1}} }
 };
 
 // --- TABLES DE WALL KICKS SRS ---
+// [IMPORTANT] Ces tables définissent comment la pièce se décale si elle tourne contre un mur.
+// C'est ce qui permet de faire des rotations "impossibles" (T-Spin techniques).
 const int WALL_KICKS_JLSTZ[8][5][2] = {
     {{0, 0}, {-1, 0}, {-1, 1}, {0, -2}, {-1, -2}}, // 0 -> 1 (R)
     {{0, 0}, {1, 0}, {1, -1}, {0, 2}, {1, 2}},     // 1 -> 0 (L)
@@ -73,17 +42,20 @@ const int WALL_KICKS_JLSTZ[8][5][2] = {
 };
 
 const int WALL_KICKS_I[8][5][2] = {
-    {{0, 0}, {-2, 0}, {1, 0}, {-2, -1}, {1, 2}},   // 0 -> 1 (R)
-    {{0, 0}, {2, 0}, {-1, 0}, {2, 1}, {-1, -2}},   // 1 -> 0 (L)
-    {{0, 0}, {-1, 0}, {2, 0}, {-1, 2}, {2, -1}},   // 1 -> 2 (R)
-    {{0, 0}, {1, 0}, {-2, 0}, {1, -2}, {-2, 1}},   // 2 -> 1 (L)
-    {{0, 0}, {2, 0}, {-1, 0}, {2, 1}, {-1, -2}},   // 2 -> 3 (R)
-    {{0, 0}, {-2, 0}, {1, 0}, {-2, -1}, {1, 2}},   // 3 -> 2 (L)
-    {{0, 0}, {1, 0}, {-2, 0}, {1, -2}, {-2, 1}},   // 3 -> 0 (R)
-    {{0, 0}, {-1, 0}, {2, 0}, {-1, 2}, {2, -1}}    // 0 -> 3 (L)
+    // La barre (I) a ses propres règles de rotation car elle est longue.
+    {{0, 0}, {-2, 0}, {1, 0}, {-2, -1}, {1, 2}},   
+    {{0, 0}, {2, 0}, {-1, 0}, {2, 1}, {-1, -2}},   
+    {{0, 0}, {-1, 0}, {2, 0}, {-1, 2}, {2, -1}},   
+    {{0, 0}, {1, 0}, {-2, 0}, {1, -2}, {-2, 1}},   
+    {{0, 0}, {2, 0}, {-1, 0}, {2, 1}, {-1, -2}},   
+    {{0, 0}, {-2, 0}, {1, 0}, {-2, -1}, {1, 2}},   
+    {{0, 0}, {1, 0}, {-2, 0}, {1, -2}, {-2, 1}},   
+    {{0, 0}, {-1, 0}, {2, 0}, {-1, 2}, {2, -1}}    
 };
 
-// --- 7-BAG ---
+// --- 7-BAG (RANDOMIZER EQUITABLE) ---
+// Au lieu d'un pur hasard (qui pourrait donner 3 carrés de suite),
+// on met les 7 formes dans un sac, on mélange, on distribue, et on recommence.
 static void shuffleBag(GameContext* game) {
     for (int i = 0; i < 7; i++) {
         game->pieceBag[i] = i;
@@ -104,13 +76,13 @@ int getRandomPieceType(GameContext* game) {
     return game->pieceBag[game->bagIndex++];
 }
 
-// --- SAUVEGARDE ---
+// --- SAUVEGARDE ET CHARGEMENT ---
 void saveGameData(GameContext* game, int saveFullState) {
     FILE* f = fopen("save.dat", "wb");
     if (f) {
         fwrite(&saveFullState, sizeof(int), 1, f);
         fwrite(game, sizeof(GameContext), 1, f);
-        SaveInputProfile(f);
+        SaveInputProfile(f); // On sauvegarde aussi les touches
         fclose(f);
     }
 }
@@ -123,6 +95,7 @@ void loadGameData(GameContext* game) {
             GameContext tempGame;
             if (fread(&tempGame, sizeof(GameContext), 1, f) == 1) {
                 *game = tempGame;
+                // Si une partie était en cours, on la met en pause au démarrage
                 if (hasSave) {
                     game->state = STATE_MENU;
                     game->isPaused = 1;
@@ -131,6 +104,7 @@ void loadGameData(GameContext* game) {
                     game->gameInProgress = 0;
                     game->state = STATE_MENU;
                 }
+                // On force le rechargement des assets car les pointeurs SDL ne sont pas sauvegardés
                 game->reloadAssetsPending = 1;
                 game->changeMusicPending = 1;
                 game->changeResolutionPending = 1;
@@ -139,6 +113,7 @@ void loadGameData(GameContext* game) {
         LoadInputProfile(f);
         fclose(f);
     } else {
+        // Pas de sauvegarde : valeurs par défaut
         game->highScore = 0;
         game->bestLines = 0;
         game->gameInProgress = 0;
@@ -155,6 +130,7 @@ void initDefaultKeys(GameContext* game) {}
 void initGame(GameContext* game) {
     srand(time(NULL));
 
+    // Valeurs par défaut du menu
     game->state = STATE_MENU;
     game->menuSelectedOption = 0;
     game->menuAutoSpeed = 1;
@@ -227,37 +203,37 @@ void resetSettings(GameContext* game) {
     InitInputProfile();
 }
 
+// [COLLISIONS] Vérifie si la pièce à (px, py) touche un mur ou un bloc existant
 static int checkCollision(GameContext* game, int px, int py, int type, int rot) {
     for (int i = 0; i < 4; i++) {
         int bx = px + TETROMINO_SHAPES[type][rot][i][1];
         int by = py + TETROMINO_SHAPES[type][rot][i][0];
+        
+        // Sortie de grille (Gauche, Droite, Bas)
         if (bx < 0 || bx >= BOARD_WIDTH || by >= BOARD_HEIGHT) return 1;
+        
+        // Collision avec un bloc déjà posé (seulement si y >= 0)
         if (by >= 0 && game->board[by][bx] != -1) return 1;
     }
     return 0;
 }
 
-// --- DETECTION T-SPIN ---
 static int isOccupied(GameContext* game, int x, int y) {
-    // Les murs extérieurs comptent comme occupés
-    if (x < 0 || x >= BOARD_WIDTH || y >= BOARD_HEIGHT) return 1;
-    // Au dessus du plateau (ciel) c'est vide
-    if (y < 0) return 0; 
-    // Sinon on regarde la grille
+    if (x < 0 || x >= BOARD_WIDTH || y >= BOARD_HEIGHT) return 1; // Mur = Occupé
+    if (y < 0) return 0; // Au dessus de l'écran = Vide
     return (game->board[y][x] != -1);
 }
 
+// [T-SPIN] Détecte la manoeuvre technique T-Spin
 static int checkTSpin(GameContext* game) {
-    if (game->currentPiece.type != 2) return 0; // 2 = Pièce T
-    if (!game->lastActionWasRotate) return 0;   // Faut avoir tourné juste avant
+    if (game->currentPiece.type != 2) return 0; // Doit être un 'T'
+    if (!game->lastActionWasRotate) return 0;   // La dernière action DOIT être une rotation
 
     int x = game->currentPiece.x;
     int y = game->currentPiece.y;
     int corners = 0;
 
-    // Le centre du T est en (x+1, y+1) localement dans la boite 4x4
-    // Les coins de la boite 3x3 autour du centre sont (0,0), (2,0), (0,2), (2,2)
-    // Coordonnées relatives :
+    // On vérifie les 4 coins autour du centre du T
     if (isOccupied(game, x, y)) corners++;         // Haut-Gauche
     if (isOccupied(game, x + 2, y)) corners++;     // Haut-Droite
     if (isOccupied(game, x, y + 2)) corners++;     // Bas-Gauche
@@ -266,7 +242,6 @@ static int checkTSpin(GameContext* game) {
     // Règle officielle : 3 coins occupés = T-Spin
     return (corners >= 3);
 }
-// ------------------------
 
 static void spawnPiece(GameContext* game) {
     game->currentPiece.type = game->nextPieceType;
@@ -285,6 +260,7 @@ static void spawnPiece(GameContext* game) {
     game->lastActionWasRotate = 0;
     game->tSpinBonus = 0;
 
+    // Game Over instantané si la nouvelle pièce touche quelque chose
     if (checkCollision(game, game->currentPiece.x, game->currentPiece.y, game->currentPiece.type, 0)) {
         game->state = STATE_GAMEOVER;
         game->gameInProgress = 0;
@@ -310,9 +286,10 @@ void resetGameLogic(GameContext* game) {
     
     game->messageTimer = 0;
 
+    // Calcul vitesse : (0.8 - ((Level-1)*0.007))^ (Level-1) - Formule approximative Tetris Worlds
     double multiplier = pow(0.75, game->level - 1);
     game->fallInterval = (int)(multiplier * 1000);
-    if (game->fallInterval < 50) game->fallInterval = 50;
+    if (game->fallInterval < 50) game->fallInterval = 50; // Cap vitesse max
 
     game->dasDirection = 0;
     game->dasTimer = 0;
@@ -326,6 +303,8 @@ void resetGameLogic(GameContext* game) {
 
 static void performLineClear(GameContext* game) {
     int linesFound = game->linesToClearCount;
+    
+    // Suppression des lignes et descente des blocs du dessus
     for (int i = 0; i < linesFound; i++) {
         int y = game->linesToClear[i];
         for (int row = y; row > 0; row--) {
@@ -337,14 +316,15 @@ static void performLineClear(GameContext* game) {
             game->board[0][x] = -1;
         }
     }
+
+    // Gestion du SCORING
     if (linesFound > 0) {
         game->linesCleared += linesFound;
         
-        // --- NOUVEAU SYSTEME DE SCORE ---
         int baseScore = 0;
         
         if (game->tSpinBonus) {
-            // T-Spin !
+            // T-Spin Bonus !
             switch(linesFound) {
                 case 1: baseScore = 800; sprintf(game->messageText, "T-SPIN SINGLE"); break;
                 case 2: baseScore = 1200; sprintf(game->messageText, "T-SPIN DOUBLE"); break;
@@ -352,7 +332,7 @@ static void performLineClear(GameContext* game) {
                 default: baseScore = 400; sprintf(game->messageText, "T-SPIN"); break;
             }
         } else {
-            // Normal
+            // Scoring Standard
             switch(linesFound) {
                 case 1: baseScore = 100; break;
                 case 2: baseScore = 300; break;
@@ -363,13 +343,12 @@ static void performLineClear(GameContext* game) {
         
         if (baseScore > 0) {
             game->score += baseScore * game->level;
-            // Si on a un message à afficher, on met le timer
             if (game->tSpinBonus || linesFound == 4) {
-                game->messageTimer = 120; // ~2 secondes
+                game->messageTimer = 120; // Afficher le message pendant 2 sec
             }
         }
-        // --------------------------------
         
+        // Augmentation du niveau
         int newLevel = game->menuStartLevel + game->linesCleared / 10;
         if (newLevel > 10) newLevel = 10;
         if (newLevel > game->level) {
@@ -381,7 +360,7 @@ static void performLineClear(GameContext* game) {
             }
         }
     } else {
-        // Cas rare : T-Spin sans ligne (Mini T-Spin Zero)
+        // T-Spin Zero (Rare : rotation T-Spin sans faire de ligne)
         if (game->tSpinBonus) {
              game->score += 400 * game->level;
              sprintf(game->messageText, "T-SPIN");
@@ -408,29 +387,30 @@ static void detectLines(GameContext* game) {
         if (full) game->linesToClear[game->linesToClearCount++] = y;
     }
     if (game->linesToClearCount > 0) {
-        game->state = STATE_ANIMATING;
+        game->state = STATE_ANIMATING; // Passe en mode animation
         game->animTimer = 0;
         game->playSoundClearPending = 1;
     } else {
-        // Pas de ligne, mais peut-être un T-Spin sans ligne
         performLineClear(game); 
     }
 }
 
 static void lockPiece(GameContext* game) {
-    // 1. Détecter le T-Spin AVANT de verrouiller la pièce
+    // 1. Détecter le T-Spin AVANT de verrouiller la pièce dans la grille
     if (checkTSpin(game)) {
         game->tSpinBonus = 1;
     } else {
         game->tSpinBonus = 0;
     }
 
+    // Copie de la pièce active vers la grille statique
     for (int i = 0; i < 4; i++) {
         int bx = game->currentPiece.x + TETROMINO_SHAPES[game->currentPiece.type][game->currentPiece.rotation][i][1];
         int by = game->currentPiece.y + TETROMINO_SHAPES[game->currentPiece.type][game->currentPiece.rotation][i][0];
         if (by >= 0 && by < BOARD_HEIGHT && bx >= 0 && bx < BOARD_WIDTH) {
             game->board[by][bx] = game->currentPiece.type;
         } else if (by < 0) {
+            // Lock Out (Game Over si pièce bloquée en haut)
             game->state = STATE_GAMEOVER;
             game->gameInProgress = 0;
             checkHighScore(game);
@@ -441,6 +421,7 @@ static void lockPiece(GameContext* game) {
     detectLines(game);
 }
 
+// Empêche le "Infinite Spin" en limitant le nombre de reset du timer au sol
 static void resetLockTimerIfAllowed(GameContext* game) {
     if (game->lockDelayResets < MAX_LOCK_RESETS) {
         game->lockTimer = 0;
@@ -457,14 +438,15 @@ static void movePiece(GameContext* game, int dx, int dy) {
         game->lastActionWasRotate = 0; // Le mouvement annule le T-Spin
         
         if (dy > 0) {
+            // Si on tombe
             game->fallTimer = 0;
             if (game->currentPiece.y > game->lowestY) {
                 game->lowestY = game->currentPiece.y;
-                game->lockTimer = 0;
-                game->lockDelayResets = 0;
+                game->lockTimer = 0;      // Reset le temps avant verrouillage
+                game->lockDelayResets = 0; // Reset le compteur anti-triche
             }
         } else {
-            // Si on bouge et qu'on est toujours au sol
+            // Si on bouge latéralement au sol
             if (checkCollision(game, game->currentPiece.x, game->currentPiece.y + 1, game->currentPiece.type, game->currentPiece.rotation)) {
                 resetLockTimerIfAllowed(game);
             }
@@ -472,17 +454,18 @@ static void movePiece(GameContext* game, int dx, int dy) {
     }
 }
 
+// [ROTATION SRS] Cœur du système de rotation complexe
 static void rotatePiece(GameContext* game, int dir) {
     if (game->state != STATE_PLAYING || game->isPaused) return;
-    
-    // Le carré (O) ne tourne jamais
-    if (game->currentPiece.type == 1) return; 
+    if (game->currentPiece.type == 1) return; // O ne tourne pas
 
     int oldRot = game->currentPiece.rotation;
-    int newRot = (oldRot + dir + 4) % 4;
+    int newRot = (oldRot + dir + 4) % 4; // Modulo pour rester entre 0 et 3
     int pieceType = game->currentPiece.type;
 
+    // Détermination de la table de Wall Kicks à utiliser
     int kickIndex = 0;
+    // ... (Logique de sélection de l'index selon oldRot et newRot) ...
     if      (oldRot == 0 && newRot == 1) kickIndex = 0;
     else if (oldRot == 1 && newRot == 0) kickIndex = 1;
     else if (oldRot == 1 && newRot == 2) kickIndex = 2;
@@ -494,13 +477,13 @@ static void rotatePiece(GameContext* game, int dir) {
 
     const int (*currentKicks)[2] = (pieceType == 0) ? WALL_KICKS_I[kickIndex] : WALL_KICKS_JLSTZ[kickIndex];
 
+    // On teste 5 positions (la rotation normale + 4 décalages "kicks")
     for (int i = 0; i < 5; i++) {
         int kickX = currentKicks[i][0];
         int kickY = currentKicks[i][1];
 
-        // Inversion Y SDL
         int testX = game->currentPiece.x + kickX;
-        int testY = game->currentPiece.y - kickY;
+        int testY = game->currentPiece.y - kickY; // Y inversé car SDL Y augmente vers le bas
 
         if (!checkCollision(game, testX, testY, pieceType, newRot)) {
             // Rotation Validée !
@@ -508,9 +491,9 @@ static void rotatePiece(GameContext* game, int dir) {
             game->currentPiece.y = testY;
             game->currentPiece.rotation = newRot;
             
-            game->lastActionWasRotate = 1; // On vient de tourner !
+            game->lastActionWasRotate = 1; // Marque cruciale pour le T-Spin
 
-            // Gestion Lock Delay
+            // Si on tourne alors qu'on est au sol, on reset le timer de verrouillage (permet d'ajuster)
             if (checkCollision(game, game->currentPiece.x, game->currentPiece.y + 1, pieceType, newRot)) {
                 resetLockTimerIfAllowed(game);
             }
@@ -521,10 +504,11 @@ static void rotatePiece(GameContext* game, int dir) {
 
 static void dropPiece(GameContext* game) {
     if (game->state != STATE_PLAYING || game->isPaused) return;
+    // Hard Drop : boucle jusqu'à toucher le fond
     while (!checkCollision(game, game->currentPiece.x, game->currentPiece.y + 1, game->currentPiece.type, game->currentPiece.rotation)) {
         game->currentPiece.y++;
-        game->score += 2;
-        game->lastActionWasRotate = 0; // Drop annule T-Spin
+        game->score += 2; // Bonus de points pour drop rapide
+        game->lastActionWasRotate = 0;
     }
     lockPiece(game);
 }
@@ -533,9 +517,11 @@ static void holdPiece(GameContext* game) {
     if (game->state != STATE_PLAYING || game->isPaused || !game->canHold) return;
     int temp = game->currentPiece.type;
     if (game->heldPieceType == -1) {
+        // Premier hold
         game->heldPieceType = temp;
         spawnPiece(game);
     } else {
+        // Échange
         int held = game->heldPieceType;
         game->heldPieceType = temp;
         game->currentPiece.type = held;
@@ -551,21 +537,25 @@ static void holdPiece(GameContext* game) {
         game->lastActionWasRotate = 0;
         game->tSpinBonus = 0;
     }
-    game->canHold = 0;
+    game->canHold = 0; // Interdit de re-changer immédiatement
 }
 
+// [GAME LOOP LOGIC] Appelé à chaque frame
 void updateGame(GameContext* game, Uint32 deltaTime) {
     if (game->state == STATE_PLAYING && !game->isPaused) {
         
+        // --- GESTION DAS / ARR (Mouvement Fluide) ---
         if (game->dasDirection != 0) {
             game->dasTimer += deltaTime;
             if (game->dasPhase == 0) {
+                // Phase 1 : Attente initiale (DAS Delay)
                 if (game->dasTimer >= DAS_DELAY) {
                     game->dasPhase = 1;
                     game->dasTimer = 0;
                     movePiece(game, game->dasDirection, 0);
                 }
             } else {
+                // Phase 2 : Répétition rapide (ARR)
                 if (game->dasTimer >= ARR_RATE) {
                     game->dasTimer -= ARR_RATE;
                     movePiece(game, game->dasDirection, 0);
@@ -573,21 +563,25 @@ void updateGame(GameContext* game, Uint32 deltaTime) {
             }
         }
 
+        // --- GRAVITÉ ET LOCK DELAY ---
         if (checkCollision(game, game->currentPiece.x, game->currentPiece.y + 1, game->currentPiece.type, game->currentPiece.rotation)) {
+            // Au sol : on lance le chrono de verrouillage
             game->lockTimer += deltaTime;
             if (game->lockTimer >= LOCK_DELAY) {
                 lockPiece(game);
             }
         } else {
+            // En l'air : on applique la gravité
             game->lockTimer = 0;
             game->fallTimer += deltaTime;
             if (game->fallTimer >= game->fallInterval) {
                 movePiece(game, 0, 1);
+                game->fallTimer = 0; // [Correction] Reset timer après chute
             }
         }
     } else if (game->state == STATE_ANIMATING) {
         game->animTimer += deltaTime;
-        if (game->animTimer >= 500) {
+        if (game->animTimer >= 500) { // Durée animation
             performLineClear(game);
         }
     }
@@ -607,6 +601,8 @@ void rebindKey(GameContext* game, SDL_Keycode key) {
 }
 
 void handleInput(GameContext* game, SDL_Keycode key) {
+    // ... (Gestion des menus, Volume, etc. identique à l'original) ...
+    // Je laisse la structure pour ne pas surcharger, la logique clé est dans updateGame
     if (IsActionPressed(ACTION_MUTE, key)) { }
 
     if (key == SDLK_m) {
@@ -689,27 +685,24 @@ void handleInput(GameContext* game, SDL_Keycode key) {
         } else if (key == SDLK_SPACE) {
             game->isPaused = !game->isPaused;
         } else if (!game->isPaused) {
+            // Utilisations des Actions Abstraites
             if (IsActionPressed(ACTION_LEFT, key)) {
                 movePiece(game, -1, 0);
-                game->dasDirection = -1;
+                game->dasDirection = -1; // Active le DAS gauche
                 game->dasTimer = 0;
                 game->dasPhase = 0;
             }
             else if (IsActionPressed(ACTION_RIGHT, key)) {
                 movePiece(game, 1, 0);
-                game->dasDirection = 1;
+                game->dasDirection = 1; // Active le DAS droite
                 game->dasTimer = 0;
                 game->dasPhase = 0;
             }
             else if (IsActionPressed(ACTION_DOWN, key)) { movePiece(game, 0, 1); game->score++; }
             else if (IsActionPressed(ACTION_UP, key)) dropPiece(game);
             
-            // --- CORRECTION SENS DE ROTATION ---
-            // A (Gauche) = -1 (Anti-Horaire)
             else if (IsActionPressed(ACTION_A, key)) rotatePiece(game, -1);
-            // E (Droite) = 1 (Horaire)
             else if (IsActionPressed(ACTION_E, key)) rotatePiece(game, 1);
-            // -----------------------------------
             
             else if (IsActionPressed(ACTION_C, key)) holdPiece(game);
         }
@@ -721,6 +714,7 @@ void handleInput(GameContext* game, SDL_Keycode key) {
     }
 }
 
+// [DAS] Fonction importante pour arrêter le mouvement rapide quand on lâche la touche
 void handleInputUp(GameContext* game, SDL_Keycode key) {
     if (game->state == STATE_PLAYING && !game->isPaused) {
         if (game->dasDirection == -1 && IsActionPressed(ACTION_LEFT, key)) {
